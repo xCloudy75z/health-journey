@@ -1,0 +1,12 @@
+{
+  "name": "Health Journey",
+  "short_name": "Health",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e9eeec",
+  "theme_color": "#2f9e8f",
+  "icons": [
+    { "src": "icons/apple-touch-icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
