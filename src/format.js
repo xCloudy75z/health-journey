@@ -11,5 +11,13 @@
     if (n === 0) return '0.0';
     return (n > 0 ? '+' : '−') + Math.abs(n).toFixed(1);
   }
-  return { formatKg: formatKg, formatSigned: formatSigned };
+  var WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function formatInt(n){ return isNum(n) ? String(Math.round(n)) : '—'; }
+  function ymd(s){ var p=s.split('-'); return new Date(Date.UTC(+p[0],+p[1]-1,+p[2],12)); } // @impure-ok deterministic parse of an explicit date string
+  function formatDateShort(dateStr, todayStr){
+    if (dateStr===todayStr) return 'Today';
+    var d=ymd(dateStr); return WD[d.getUTCDay()]+' · '+d.getUTCDate()+' '+MO[d.getUTCMonth()];
+  }
+  return { formatKg: formatKg, formatSigned: formatSigned, formatInt: formatInt, formatDateShort: formatDateShort };
 });
