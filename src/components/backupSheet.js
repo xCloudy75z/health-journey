@@ -47,16 +47,34 @@
     function showError(msg) { banner.innerHTML = '<div class="banner" style="border-color:var(--bad);background:var(--bad-soft);color:var(--bad)">' + msg + '</div>'; }
     function clearBanner() { banner.innerHTML = ''; }
 
-    // Export
+    // Export — BB8: <a download> is unreliable in iOS standalone (PWA) mode. Prefer the
+    // native share sheet (Files / AirDrop / Mail) when it can share the file; otherwise
+    // fall back to the blob anchor, guarded so a failure surfaces instead of silently throwing.
     wrap.querySelector('#bk-export').addEventListener('click', function () {
       var payload = store.exportPayload(nowISO);
-      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = 'health-journey-backup-' + localYMD(new Date()) + '.json';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      if (HJ.toast) HJ.toast('Backed up');
+      var json = JSON.stringify(payload, null, 2);
+      var filename = 'health-journey-backup-' + localYMD(new Date()) + '.json';
+
+      var file = null;
+      try { file = new File([json], filename, { type: 'application/json' }); } catch (e) { file = null; }
+      if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        navigator.share({ files: [file], title: 'Health Journey backup' })
+          .then(function () { if (HJ.toast) HJ.toast('Backed up'); })
+          .catch(function () { /* user cancelled the share sheet — no error */ });
+        return;
+      }
+      try {
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        if (HJ.toast) HJ.toast('Backed up');
+      } catch (e) {
+        showError('Could not export the backup on this device. Try again from Safari.');
+        if (HJ.toast) HJ.toast('Export failed');
+      }
     });
 
     // Import
