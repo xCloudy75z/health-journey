@@ -70,6 +70,16 @@ test('import REJECTS a foreign app backup (e.g. spending-tracker)', () => {
   assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'existing data untouched after a rejected import');
 });
 
+test('import REJECTS a payload with a malformed dailyLogs item; prior data untouched (BB3)', () => {
+  const s = createStore(fakeStorage());
+  s.setDay('2026-08-10', { weightKg: 109.5, dose: 'correct' });
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 1, state: { dailyLogs: [{ weightKg: 70 }] } });
+  assert.strictEqual(res.ok, false);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'existing data untouched after a rejected import');
+  assert.strictEqual(s.getDay('2026-08-10').dose, 'correct');
+  assert.strictEqual(s.allLogs().length, 1);
+});
+
 test('import keeps UNDO — snapshot before, restore after', () => {
   const s = createStore(fakeStorage());
   s.setDay('2026-08-10', { weightKg: 109.5 });
