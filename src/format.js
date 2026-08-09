@@ -19,5 +19,7 @@
     if (dateStr===todayStr) return 'Today';
     var d=ymd(dateStr); return WD[d.getUTCDay()]+' · '+d.getUTCDate()+' '+MO[d.getUTCMonth()];
   }
-  return { formatKg: formatKg, formatSigned: formatSigned, formatInt: formatInt, formatDateShort: formatDateShort };
+  // BB15: day + month only (e.g. "8 Sep"), for the derived Day-30 label.
+  function formatDayMonth(dateStr){ var d=ymd(dateStr); return d.getUTCDate()+' '+MO[d.getUTCMonth()]; }
+  return { formatKg: formatKg, formatSigned: formatSigned, formatInt: formatInt, formatDateShort: formatDateShort, formatDayMonth: formatDayMonth };
 });

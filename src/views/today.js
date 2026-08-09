@@ -45,7 +45,10 @@
     var w = typeof d.weightKg === 'number'
       ? '<div class="w">' + d.weightKg.toFixed(1) + '<span class="u">kg</span></div>'
       : '<div class="w" style="color:var(--muted);font-weight:600">—</div>';
-    return '<li class="row"><span class="ic">📅</span>' +
+    // BB9: each row carries its date and is tappable → app.js opens the log sheet for
+    // that day (edit / backfill a past entry).
+    return '<li class="row row-tap" data-date="' + esc(d.date) + '" role="button" tabindex="0">' +
+      '<span class="ic">📅</span>' +
       '<div class="m"><div class="t">' + esc(HJ.format.formatDateShort(d.date, todayStr)) + '</div>' +
       '<div class="s tick ' + db.cls + '">' + esc(parts.join(' · ')) + '</div></div>' + w + '</li>';
   }
@@ -91,11 +94,14 @@
       chips += '<span class="chip good"><span class="dot"></span>Dose correct ' + tally.correct + ' / ' + tally.completed + '</span>';
     }
     if (typeof today.walkedMin === 'number') chips += '<span class="chip"><span class="dot"></span>Walked ' + HJ.format.formatInt(today.walkedMin) + ' min today</span>';
-    if (typeof today.sideEffects === 'number' && today.sideEffects > 0) chips += '<span class="chip warn"><span class="dot"></span>Side effects: ' + SIDE[today.sideEffects].toLowerCase() + '</span>';
+    // BB10: 0 = an explicit "no side effects" (neutral chip); null = not logged (no chip);
+    // >0 = amber severity chip (the one intentional health-signal colour).
+    if (today.sideEffects === 0) chips += '<span class="chip"><span class="dot"></span>No side effects today</span>';
+    else if (typeof today.sideEffects === 'number' && today.sideEffects > 0) chips += '<span class="chip warn"><span class="dot"></span>Side effects: ' + SIDE[today.sideEffects].toLowerCase() + '</span>';
     if (tally.unconfirmed > 0) chips += '<span class="chip"><span class="dot"></span>' + tally.unconfirmed + ' day' + (tally.unconfirmed === 1 ? '' : 's') + ' need their dose confirmed</span>';
 
     // Strip
-    var day30 = '~8 Sep';
+    var day30 = HJ.format.formatDayMonth(HJ.calc.addDays(DAY1, 29));   // BB15: derived, not hardcoded
     var todayW = typeof today.weightKg === 'number' ? today.weightKg.toFixed(1) + ' kg' : '—';
     var pct = Math.max(0, Math.min(100, Math.round((dayN / 30) * 100)));
     var dayLabel = dayN >= 1 ? 'Day ' + dayN : 'Starts 10 Aug';
@@ -106,8 +112,11 @@
       '</div><div class="strip-bar"><div style="width:' + pct + '%"></div></div>' +
       '<div class="strip-sub"><span>' + dayLabel + '</span><span>Day 30 · ' + day30 + '</span></div></div>';
 
-    // Trend
-    var weights = logs.filter(function (l) { return typeof l.weightKg === 'number'; }).slice(-7).map(function (l) { return l.weightKg; });
+    // Trend — BB13: same window as the hero (non-null weights in the trailing 7 calendar
+    // days), so the graph and the 7-day average never disagree about which readings count.
+    var weights = logs.filter(function (l) {
+      return typeof l.weightKg === 'number' && HJ.calc.withinTrailing7(l.date, todayStr);
+    }).map(function (l) { return l.weightKg; });
     var trend = weights.length >= 2
       ? '<div class="card">' + trendSvg(weights) +
           '<div class="trend-legend"><span><span class="sw"></span>Your weight (Eufy)</span><span>Neutral — no targets. Dr Ola sets the pace.</span></div></div>'
@@ -123,8 +132,10 @@
       (chips ? '<div class="chips">' + chips + '</div>' : '') +
       strip +
       '<div class="section-h">Weight trend <span class="r">last 7 days</span></div>' + trend +
-      '<div class="section-h">Recent days <span class="r">tap ＋ to add</span></div>' +
+      '<div class="section-h">Recent days <span class="r">tap a day to edit</span></div>' +
       '<div class="card" style="padding:2px 14px"><ul class="rows">' + recent + '</ul></div>' +
+      // BB11: backup is otherwise hidden behind the ⤓ glyph until the Report tab exists.
+      '<div class="banner" style="margin-top:14px">💾 Back up weekly — tap ⤓ (top-right) to export your data.</div>' +
     '</section>';
   }
 

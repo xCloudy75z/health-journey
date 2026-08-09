@@ -13,7 +13,9 @@
 
   // Local Y-M-D — never toISOString() (UTC would mislabel 00:00–04:00 Dubai). (C2)
   function localYMD(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  var todayStr = localYMD(new Date());   // computed once at app start
+  // BB4: recomputed at every render + when the log sheet opens, so a session left open
+  // across midnight never writes to (or shows) the wrong day.
+  var todayStr = localYMD(new Date());
 
   var store = HJ.store.createStore(window.localStorage);
 
@@ -41,6 +43,7 @@
   }
 
   function render() {
+    todayStr = localYMD(new Date());   // BB4: refresh the day on every render
     var app = document.getElementById('app');
     var tab = TABS.filter(function (t) { return t.id === active; })[0];
     app.innerHTML =
@@ -63,13 +66,27 @@
     });
     var logBtn = document.getElementById('logBtn');
     if (logBtn) logBtn.addEventListener('click', function () {
+      todayStr = localYMD(new Date());   // BB4: fresh day at the moment the sheet opens
       HJ.logSheet.open(store, todayStr, render);
     });
     [].forEach.call(app.querySelectorAll('.tab'), function (btn) {
       btn.addEventListener('click', function () { active = btn.getAttribute('data-tab'); render(); });
     });
+    // BB9: tap (or keyboard-activate) a recent day to edit/backfill that date.
+    [].forEach.call(app.querySelectorAll('.row-tap[data-date]'), function (row) {
+      function openDay() { HJ.logSheet.open(store, row.getAttribute('data-date'), render); }
+      row.addEventListener('click', openDay);
+      row.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDay(); }
+      });
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();
+
+  // BB4: re-render when the PWA returns to the foreground (resume / bfcache restore),
+  // so the day rolls over even without a full reload.
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
+  window.addEventListener('pageshow', function () { render(); });
 })();

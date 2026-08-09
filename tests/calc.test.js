@@ -1,7 +1,7 @@
 // tests/calc.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally } = require('../src/calc.js');
+const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays } = require('../src/calc.js');
 
 const DAY1 = '2026-08-10';
 
@@ -19,6 +19,11 @@ test('dayNumber: Day 1 on the start date, Day 30 on 8 Sep', () => {
 test('countdownToDay30: 29 on Day 1, 0 on Day 30', () => {
   assert.strictEqual(countdownToDay30('2026-08-10', DAY1), 29);
   assert.strictEqual(countdownToDay30('2026-09-08', DAY1), 0);
+});
+
+test('addDays derives the Day-30 date from Day 1 + 29 (BB15)', () => {
+  assert.strictEqual(addDays(DAY1, 29), '2026-09-08');   // Day 30
+  assert.strictEqual(addDays('2026-08-31', 1), '2026-09-01'); // month rollover
 });
 
 test('dayNumber handles a skipped day (gap does not break numbering)', () => {

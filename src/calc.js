@@ -13,6 +13,11 @@
   }
   var DAY_MS = 86400000;
   function daysBetween(a, b) { return Math.round((parseYMD(b) - parseYMD(a)) / DAY_MS); }
+  // BB15: derive a calendar date N days after an explicit YYYY-MM-DD (deterministic).
+  function addDays(dateStr, n) {
+    var d = new Date(parseYMD(dateStr) + n * DAY_MS); // @impure-ok: arithmetic on a deterministic epoch
+    return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+  }
   function dayNumber(dateStr, day1Str) { return daysBetween(day1Str, dateStr) + 1; }
   function countdownToDay30(dateStr, day1Str) {
     return Math.max(0, 30 - dayNumber(dateStr, day1Str));
@@ -51,5 +56,6 @@
     return t;
   }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
-           sevenDayAvg: sevenDayAvg, doseTally: doseTally };
+           sevenDayAvg: sevenDayAvg, doseTally: doseTally, addDays: addDays,
+           withinTrailing7: withinTrailing7 };
 });
