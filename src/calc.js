@@ -17,5 +17,36 @@
   function countdownToDay30(dateStr, day1Str) {
     return Math.max(0, 30 - dayNumber(dateStr, day1Str));
   }
-  return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30 };
+  function withinTrailing7(dateStr, todayStr) {
+    var d = daysBetween(dateStr, todayStr);   // today - date
+    return d >= 0 && d <= 6;
+  }
+  function sevenDayAvg(logs, todayStr) {
+    var vals = logs.filter(function (l) {
+      return l && typeof l.weightKg === 'number' && withinTrailing7(l.date, todayStr);
+    }).map(function (l) { return l.weightKg; });
+    var n = vals.length;
+    if (n < 3) return { avg: null, n: n, building: true };
+    var sum = vals.reduce(function (a, b) { return a + b; }, 0);
+    return { avg: sum / n, n: n, building: false };
+  }
+  function doseTally(logs, todayStr, day1Str) {
+    var t = { correct: 0, incorrect: 0, missed: 0, unconfirmed: 0, rate: 0 };
+    var due = 0;
+    logs.forEach(function (l) {
+      if (!l) return;
+      if (daysBetween(day1Str, l.date) < 0) return;   // before Day 1
+      if (l.date === todayStr) return;                 // today not over → excluded
+      if (daysBetween(l.date, todayStr) < 0) return;   // future
+      due++;
+      if (l.dose === 'correct') t.correct++;
+      else if (l.dose === 'incorrect') t.incorrect++;
+      else if (l.dose === 'missed') t.missed++;
+      else t.unconfirmed++;                            // null/unset past day
+    });
+    t.rate = due > 0 ? t.correct / due : 0;
+    return t;
+  }
+  return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
+           sevenDayAvg: sevenDayAvg, doseTally: doseTally };
 });
