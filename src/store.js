@@ -21,7 +21,12 @@
     } catch (e) { state = schema.emptyState(); }
     if (!state || typeof state !== 'object' || !Array.isArray(state.dailyLogs)) state = schema.emptyState();
 
-    function persist() { storage.setItem(KEY, JSON.stringify(state)); }
+    // BB14: a failed setItem (quota/private-mode) must not throw out of a handler.
+    // Data is tiny for B2 — swallow and warn; the in-memory state is still correct.
+    function persist() {
+      try { storage.setItem(KEY, JSON.stringify(state)); }
+      catch (e) { if (typeof console !== 'undefined' && console.warn) console.warn('Health Journey: could not save to storage', e); }
+    }
 
     function getDay(date) {
       var found = state.dailyLogs.filter(function (d) { return d.date === date; })[0];
