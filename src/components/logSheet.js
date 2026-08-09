@@ -23,6 +23,7 @@
           '<div class="field">' +
             '<label>Weight (kg) — morning, after toilet, before food</label>' +
             '<input class="input input-lg" id="ls-weight" inputmode="decimal" placeholder="—">' +
+            '<div class="input-err" id="ls-weight-err" hidden>Enter a weight between 30 and 400 kg, or leave it blank.</div>' +
           '</div>' +
           '<div class="field">' +
             '<label>Walked (minutes)</label>' +
@@ -86,10 +87,19 @@
     selectByValue(segSide, prev.sideEffects == null ? null : String(prev.sideEffects));
     selectByValue(segAdh, prev.adherence == null ? null : String(prev.adherence));
 
+    // BB12: track whether the user touched anything, so a scrim/close tap on a
+    // filled-but-unsaved entry asks before discarding. Prefill above is programmatic
+    // (no input events) so `dirty` stays false on open.
+    var dirty = false;
+    function markDirty() { dirty = true; }
+    var errEl = wrap.querySelector('#ls-weight-err');
+    function clearWeightError() { elWeight.classList.remove('error'); if (errEl) errEl.hidden = true; }
+
     // Segment single-select with toggle-off (click a selected chip to clear it → unset).
     function wireSeg(seg, isDose) {
       seg.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b || !seg.contains(b)) return;
+        markDirty();
         var wasSel = b.classList.contains('sel');
         [].forEach.call(seg.querySelectorAll('button'), function (x) { x.classList.remove('sel', 'ok', 'no'); });
         if (!wasSel) { b.classList.add('sel'); if (isDose && b.getAttribute('data-kind')) b.classList.add(b.getAttribute('data-kind')); }
@@ -97,13 +107,18 @@
     }
     wireSeg(segDose, true); wireSeg(segSide, false); wireSeg(segAdh, false);
 
+    elWeight.addEventListener('input', function () { markDirty(); clearWeightError(); });
+    elNote.addEventListener('input', markDirty);
+
     // Quick-walk chips fill the free input; typing clears the chip selection.
     qaRow.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
+      markDirty();
       [].forEach.call(qaRow.querySelectorAll('.qa'), function (x) { x.classList.remove('sel'); });
       b.classList.add('sel'); elWalked.value = b.getAttribute('data-min');
     });
     elWalked.addEventListener('input', function () {
+      markDirty();
       [].forEach.call(qaRow.querySelectorAll('.qa'), function (x) { x.classList.remove('sel'); });
     });
 
@@ -122,9 +137,28 @@
     }
 
     function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
-    wrap.addEventListener('click', function (e) { if (e.target.getAttribute && e.target.getAttribute('data-close')) close(); });
+    // BB12: a scrim/✕ dismissal on a dirty entry confirms before discarding.
+    wrap.addEventListener('click', function (e) {
+      if (e.target.getAttribute && e.target.getAttribute('data-close')) {
+        if (dirty && !window.confirm('Discard this entry?')) return;
+        close();
+      }
+    });
 
     wrap.querySelector('#ls-save').addEventListener('click', function () {
+      // BB5: weight is the only hard-validated field. If it is non-empty but not a
+      // real number in 30–400 kg, block the save, keep the sheet open, flag the input.
+      var weightRaw = elWeight.value.trim();
+      if (weightRaw !== '') {
+        var wv = Number(weightRaw);
+        if (isNaN(wv) || wv < 30 || wv > 400) {
+          elWeight.classList.add('error');
+          if (errEl) errEl.hidden = false;
+          elWeight.focus();
+          return;
+        }
+      }
+      clearWeightError();
       var side = selectedValue(segSide);
       var adh = selectedValue(segAdh);
       var form = {
