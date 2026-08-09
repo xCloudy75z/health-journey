@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Health Journey</title>
+<meta name="theme-color" content="#1a2220" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e9eeec" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Health">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<script>
+  // FOUC prevention: apply saved theme before first paint
+  try {
+    var t = localStorage.getItem('hj-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+</script>
+<!-- STYLES:START -->
+<link rel="stylesheet" href="src/styles/main.css">
+<!-- STYLES:END -->
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-root"></div>
+<!-- MODULES:START -->
+<script src="src/format.js"></script>
+<script src="src/calc.js"></script>
+<script src="src/app.js"></script>
+<!-- MODULES:END -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+</script>
+</body>
+</html>
