@@ -1,6 +1,6 @@
-// src/calc.js — pure day math. No new Date() inside pure paths except UTC-noon
-// parsing of an explicit YYYY-MM-DD (deterministic; lint:pure allowlists this file's
-// parseYMD helper via the // @impure-ok marker below).
+// src/calc.js — pure day math. No wall-clock date construction inside pure paths;
+// the only exception is UTC-noon parsing of an explicit YYYY-MM-DD (deterministic;
+// lint:pure allowlists this file's parseYMD helper via the // @impure-ok marker below).
 (function (root, factory) {
   var api = factory();
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
