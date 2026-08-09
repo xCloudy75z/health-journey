@@ -8,7 +8,7 @@
   // A one-off toast that carries an Undo button (auto-dismiss ~6s to give time to undo).
   function undoToast(msg, onUndo) {
     var root = document.getElementById('toast-root'); if (!root) return;
-    var el = h('<div class="toast"><span>' + msg + '</span><button class="btn btn-ghost" type="button" style="width:auto;padding:6px 12px;margin-inline-start:auto">Undo</button></div>');
+    var el = h('<div class="toast interactive"><span>' + msg + '</span><button class="btn btn-ghost" type="button" style="width:auto;padding:6px 12px;margin-inline-start:auto">Undo</button></div>');
     root.appendChild(el);
     requestAnimationFrame(function () { el.classList.add('show'); });
     var t = setTimeout(remove, 6000);

@@ -193,6 +193,10 @@ input{font:inherit}
   z-index:120;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;
   max-width:var(--container);margin-inline:auto}
 .toast.show{opacity:1;transform:none}
+/* BB1: the toast layer is click-through, but any button inside it (and an
+   explicitly-interactive toast, e.g. the import Undo) must be tappable. */
+.toast button{pointer-events:auto}
+.toast.interactive{pointer-events:auto}
 
 .banner{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);padding:11px 14px;border-radius:11px;font-size:12.5px;line-height:1.5;margin:10px 0}
 
