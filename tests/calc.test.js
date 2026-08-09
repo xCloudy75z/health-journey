@@ -67,8 +67,21 @@ test('doseTally: past unset dose = unconfirmed (NOT missed); today unset exclude
   assert.strictEqual(t.correct, 1);
   assert.strictEqual(t.incorrect, 1);
   assert.strictEqual(t.missed, 0);
-  assert.strictEqual(t.unconfirmed, 1);
-  // rate = correct / completed-dose-due-days (past days that are resolved OR unconfirmed=counted as due)
-  // denominator excludes today (not over). Due days = 10,11,12 → 3. rate = 1/3.
-  assert.ok(Math.abs(t.rate - 1/3) < 0.001);
+  assert.strictEqual(t.unconfirmed, 1, 'unconfirmed reported separately');
+  // BB2: rate denominator is COMPLETED doses only (correct+incorrect+missed),
+  // not unconfirmed days. Completed = 1 correct + 1 incorrect = 2 → rate = 1/2.
+  assert.strictEqual(t.completed, 2);
+  assert.ok(Math.abs(t.rate - 0.5) < 0.001);
+});
+
+test('doseTally: rate is null (not 0) when there are no completed doses yet', () => {
+  const logs = [
+    { date: '2026-08-10', dose: null },        // past + unset → unconfirmed
+    { date: '2026-08-11', dose: null },        // past + unset → unconfirmed
+    { date: '2026-08-12', dose: null },        // today → excluded
+  ];
+  const t = doseTally(logs, '2026-08-12', '2026-08-10');
+  assert.strictEqual(t.completed, 0);
+  assert.strictEqual(t.unconfirmed, 2, 'unconfirmed still counted separately');
+  assert.strictEqual(t.rate, null);
 });

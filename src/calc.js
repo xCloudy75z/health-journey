@@ -31,20 +31,23 @@
     return { avg: sum / n, n: n, building: false };
   }
   function doseTally(logs, todayStr, day1Str) {
-    var t = { correct: 0, incorrect: 0, missed: 0, unconfirmed: 0, rate: 0 };
-    var due = 0;
+    // BB2: rate is over COMPLETED doses only (correct+incorrect+missed). Unconfirmed
+    // past days are reported separately as a nudge, never as a failed dose. `due`
+    // (all past days that should carry a dose) and `completed` are both reported.
+    var t = { correct: 0, incorrect: 0, missed: 0, unconfirmed: 0, due: 0, completed: 0, rate: null };
     logs.forEach(function (l) {
       if (!l) return;
       if (daysBetween(day1Str, l.date) < 0) return;   // before Day 1
       if (l.date === todayStr) return;                 // today not over → excluded
       if (daysBetween(l.date, todayStr) < 0) return;   // future
-      due++;
+      t.due++;
       if (l.dose === 'correct') t.correct++;
       else if (l.dose === 'incorrect') t.incorrect++;
       else if (l.dose === 'missed') t.missed++;
       else t.unconfirmed++;                            // null/unset past day
     });
-    t.rate = due > 0 ? t.correct / due : 0;
+    t.completed = t.correct + t.incorrect + t.missed;
+    t.rate = t.completed > 0 ? t.correct / t.completed : null;
     return t;
   }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,

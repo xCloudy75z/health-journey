@@ -85,8 +85,10 @@
 
     // Chips
     var chips = '';
-    if (tally.correct + tally.incorrect + tally.missed + tally.unconfirmed > 0) {
-      chips += '<span class="chip good"><span class="dot"></span>Dose correct ' + tally.correct + ' / ' + (tally.correct + tally.incorrect + tally.missed + tally.unconfirmed) + '</span>';
+    // BB2: correct-chip denominator = completed doses only. When nothing is completed
+    // yet, suppress the chip and let the "need their dose confirmed" nudge speak instead.
+    if (tally.completed > 0) {
+      chips += '<span class="chip good"><span class="dot"></span>Dose correct ' + tally.correct + ' / ' + tally.completed + '</span>';
     }
     if (typeof today.walkedMin === 'number') chips += '<span class="chip"><span class="dot"></span>Walked ' + HJ.format.formatInt(today.walkedMin) + ' min today</span>';
     if (typeof today.sideEffects === 'number' && today.sideEffects > 0) chips += '<span class="chip warn"><span class="dot"></span>Side effects: ' + SIDE[today.sideEffects].toLowerCase() + '</span>';
