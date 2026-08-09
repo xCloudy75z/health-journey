@@ -1,0 +1,218 @@
+/* Health Journey — "quiet clinic" design tokens + shell CSS.
+   VISUALS (colors, radii, fonts, component looks) ported from the approved mockup
+   (docs/mockups/2026-08-09-health-journey-mockup.html).
+   POSITIONING for the real iPhone (fixed tab bar + env(safe-area-inset-*), desktop
+   phone-frame behind @media(min-width:900px)) ported from rem-money's src/styles/main.css.
+   Mockup-only .stage/.stage-note/.phone frame intentionally NOT copied. */
+
+:root{
+  --radius:14px; --radius-sm:10px; --pill:999px; --container:430px;
+  --bg:#e9eeec; --surface:#fff; --surface-2:#f3f7f5; --surface-3:#e7eeeb;
+  --text:#14201e; --muted:#63756f; --border:#e0e8e4;
+  --accent:#2f9e8f; --accent-strong:#217d70; --accent-soft:rgba(47,158,143,.12); --accent-text:#fff;
+  --good:#2f9e6a; --good-soft:rgba(47,158,106,.14); --warn:#c68a1e; --warn-soft:rgba(198,138,30,.16);
+  --bad:#c0453b; --bad-soft:rgba(192,69,59,.14);
+  --scrim:rgba(15,32,28,.46); --glow:rgba(47,158,143,.10);
+  --shadow-1:0 1px 2px rgba(0,0,0,.07); --shadow-2:0 10px 34px rgba(15,32,28,.22); --frame:#0c1412;
+}
+:root[data-theme="dark"]{
+  --bg:#111716; --surface:#1a2220; --surface-2:#212b29; --surface-3:#2b3634;
+  --text:#eef3f1; --muted:#9cb0aa; --border:#2c3836;
+  --accent:#46c2b0; --accent-strong:#63d3c3; --accent-soft:rgba(70,194,176,.16); --accent-text:#0c1412;
+  --good:#54c489; --good-soft:rgba(70,194,137,.16); --warn:#e0a63c; --warn-soft:rgba(224,166,60,.16);
+  --bad:#e0665c; --bad-soft:rgba(224,102,92,.16);
+  --scrim:rgba(0,0,0,.58); --glow:rgba(70,194,176,.10); --shadow-2:0 10px 34px rgba(0,0,0,.5); --frame:#05090a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  background:radial-gradient(ellipse at 50% 0%,var(--glow),transparent 62%),var(--bg);
+  color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+#app{max-width:var(--container);margin-inline:auto;min-height:100vh;position:relative}
+button{font:inherit;cursor:pointer}
+input{font:inherit}
+*:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ============ APP SHELL ============ */
+/* POSITIONING from rem-money: header pads for the notch/status bar. */
+.app-header{padding:calc(16px + env(safe-area-inset-top)) 18px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.app-title small{font-weight:400;color:var(--muted);margin-inline-start:7px;font-size:12px}
+.hb{display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);display:inline-flex;align-items:center;justify-content:center;font-size:15px}
+/* .body clears the fixed tab bar (rem-money padding-bottom). */
+.body{padding:6px 18px 110px}
+
+.view{display:none}
+.view.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ============ HERO ============ */
+.hero{text-align:center;padding:20px 12px 6px}
+.hero .lbl{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hero .amt{font-size:58px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero .amt .u{font-size:20px;font-weight:600;color:var(--muted);margin-inline-start:6px}
+.hero .sub{color:var(--muted);font-size:13px;margin-top:9px}
+
+.strip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
+.strip-row{display:flex;justify-content:space-between;align-items:baseline}
+.strip-lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.strip-val{font-size:19px;font-weight:800;margin-top:2px}
+.strip-bar{height:7px;border-radius:4px;background:var(--surface-3);margin-top:11px;overflow:hidden}
+.strip-bar>div{height:100%;background:var(--accent);border-radius:4px}
+.strip-sub{color:var(--muted);font-size:12px;margin-top:7px;display:flex;justify-content:space-between}
+
+.chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px 0 2px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--pill);
+  background:var(--surface-2);border:1px solid var(--border);font-size:12px;color:var(--text)}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.good .dot{background:var(--good)}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.warn .dot{background:var(--warn)}
+.phase-pill{display:inline-flex;align-items:center;gap:7px;background:var(--good-soft);color:var(--good);border-radius:var(--pill);padding:5px 12px;font-size:12px;font-weight:700}
+
+.section-h{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  margin:20px 2px 9px;display:flex;justify-content:space-between;align-items:baseline}
+.section-h .r{text-transform:none;letter-spacing:0;font-size:12px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.card + .card{margin-top:10px}
+
+/* trend chart (neutral) */
+.trend{margin:6px 0 2px;width:100%;height:auto;display:block}
+.trend .grid{stroke:var(--border);stroke-width:1}
+.trend .ax{fill:var(--muted);font-size:9px}
+.trend .area{fill:var(--accent);opacity:.12}
+.trend .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.trend .dot{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.trend-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:12px}
+.trend-legend .sw{display:inline-block;width:15px;height:3px;border-radius:2px;background:var(--accent);vertical-align:middle;margin-inline-end:6px}
+.trend-legend .sw.dash{background:linear-gradient(90deg,var(--muted) 0 5px,transparent 5px 9px);background-size:9px 3px}
+
+/* day rows */
+.rows{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:38px 1fr auto;gap:11px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row .ic{width:38px;height:38px;border-radius:12px;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;font-size:15px}
+.row .m .t{font-size:14.5px;font-weight:600}
+.row .m .s{font-size:12px;color:var(--muted);margin-top:1px}
+.row .w{font-weight:800;font-variant-numeric:tabular-nums;font-size:15px;text-align:end}
+.row .w .u{font-size:11px;color:var(--muted);font-weight:600;margin-inline-start:3px}
+.tick{font-size:12px;margin-top:2px}
+.tick.ok{color:var(--good)} .tick.no{color:var(--bad)}
+
+/* meals */
+.meal h3{margin:0 0 4px;font-size:16px}
+.meal .items{margin:0;padding-inline-start:18px;color:var(--muted);font-size:13px;line-height:1.6}
+.macros{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.mac{background:var(--accent-soft);color:var(--accent-strong);border-radius:var(--pill);padding:4px 11px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.mac.kcal{background:var(--surface-3);color:var(--text)}
+.total{border-inline-start:4px solid var(--accent)}
+.flag{color:var(--warn);font-size:12.5px;margin-top:10px;line-height:1.5}
+
+/* guides list */
+.guide{display:flex;align-items:center;gap:13px;padding:15px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:9px;cursor:pointer;text-align:start;width:100%;color:inherit;font:inherit}
+.guide:active{background:var(--surface-2)}
+.guide .g-ic{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:inline-flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.guide .g-m{flex:1;min-width:0}
+.guide .g-t{font-size:15px;font-weight:700}
+.guide .g-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.guide .chev{color:var(--muted);font-size:18px}
+
+/* report */
+.rep-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:14px}
+.rep-line:last-child{border-bottom:none}
+.rep-line .k{color:var(--muted)}
+.rep-line .v{font-weight:700;font-variant-numeric:tabular-nums;text-align:end}
+.rep-note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:4px}
+.qlist{margin:6px 0 0;padding-inline-start:18px;color:var(--text);font-size:13.5px;line-height:1.7}
+
+/* ============ BUTTONS ============ */
+.btn{padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-weight:700;font-size:15px;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.btn-ghost{background:transparent}
+.btn-row{display:flex;gap:9px;margin-top:12px}
+
+/* Log CTA — floats above the fixed tab bar (positioning: fixed + safe-area). */
+.log-cta{position:fixed;left:0;right:0;bottom:calc(78px + env(safe-area-inset-bottom));max-width:var(--container);margin-inline:auto;display:flex;justify-content:center;z-index:35;pointer-events:none}
+.log-cta .btn{width:auto;pointer-events:auto;box-shadow:var(--shadow-2);padding-inline:22px}
+
+/* ============ TABBAR ============ */
+/* POSITIONING from rem-money: fixed to viewport bottom, safe-area padding so the
+   iOS home indicator never covers a tab. Desktop re-anchors it below. */
+.tabbar{position:fixed;left:0;right:0;bottom:0;max-width:var(--container);margin-inline:auto;
+  height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;z-index:40}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:8px 0;color:var(--muted);background:none;border:none;font-size:10.5px;font-weight:600;min-height:48px}
+.tab .ic{font-size:19px;line-height:1}
+.tab.active{color:var(--accent)}
+
+/* ============ SHEET ============ */
+.sheet-wrap{position:fixed;inset:0;z-index:100;display:none;max-width:var(--container);margin-inline:auto}
+.sheet-wrap.open{display:block}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:24px;border-top-right-radius:24px;
+  padding:0 18px 22px;padding-bottom:calc(22px + env(safe-area-inset-bottom));
+  max-height:calc(100vh - env(safe-area-inset-top) - 24px);overflow-y:auto;overscroll-behavior:contain;
+  box-shadow:0 -8px 30px rgba(0,0,0,.35);animation:up .24s ease-out}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-chrome{position:sticky;top:0;background:var(--surface);padding:10px 0 6px;z-index:5}
+.handle{width:38px;height:4px;background:var(--surface-3);border-radius:2px;margin:0 auto 8px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between}
+.sheet-title{font-size:18px;font-weight:800;margin:0}
+.sheet-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-3);color:var(--text);font-size:17px}
+.field{margin:14px 0}
+.field>label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:600}
+.input{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font:inherit;font-size:15px}
+.input-lg{font-size:34px;font-weight:800;text-align:center;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.qa-row{display:flex;gap:7px;margin-top:9px}
+.qa{flex:1;padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-weight:700;font-size:13.5px}
+.qa.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:calc(50% - 6px);padding:11px 8px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-weight:600;font-size:13px}
+.seg button.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong)}
+.seg.dose button.sel.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg.dose button.sel.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.save-row{position:sticky;bottom:0;background:var(--surface);padding-top:10px;margin-top:6px}
+
+/* ============ TOAST ============ */
+#toast-root{position:fixed;left:0;right:0;bottom:calc(150px + env(safe-area-inset-bottom));z-index:120;pointer-events:none;max-width:var(--container);margin-inline:auto}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(150px + env(safe-area-inset-bottom));background:var(--surface);border:1px solid var(--border);
+  border-inline-start:4px solid var(--good);border-radius:11px;padding:13px 15px;font-size:13.5px;box-shadow:var(--shadow-2);
+  z-index:120;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;
+  max-width:var(--container);margin-inline:auto}
+.toast.show{opacity:1;transform:none}
+
+.banner{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text);padding:11px 14px;border-radius:11px;font-size:12.5px;line-height:1.5;margin:10px 0}
+
+/* ============ DESKTOP PHONE FRAME (mockup look, desktop only) ============ */
+/* On wide screens only, wrap #app in a phone frame so the desktop preview reads as
+   a device. The real iPhone never sees this — the base rules above are what ship. */
+@media (min-width:900px){
+  body{
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--glow), transparent 60%),
+      linear-gradient(180deg,#14171c 0%,#0a0c10 100%);
+    min-height:100vh;padding:32px 16px}
+  :root[data-theme="light"] body{
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--glow), transparent 60%),
+      linear-gradient(180deg,#d6dae3 0%,#b9bfcc 100%)}
+  #app{
+    max-width:var(--container);height:calc(100vh - 64px);background:var(--bg);
+    border:11px solid var(--frame);border-radius:44px;overflow-y:auto;overflow-x:hidden;
+    position:relative;margin:0 auto;box-shadow:var(--shadow-2),0 0 0 1px rgba(255,255,255,.04) inset}
+  /* Fake notch */
+  #app::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:120px;height:24px;background:var(--frame);border-bottom-left-radius:16px;border-bottom-right-radius:16px;z-index:60}
+  #app .app-header{padding-top:34px}
+  /* Re-anchor pinned UI to the phone frame instead of the viewport. */
+  #app .tabbar{position:absolute;left:0;right:0;bottom:0;max-width:none;margin-inline:0;height:70px;padding-bottom:0}
+  #app .log-cta{position:absolute;left:0;right:0;bottom:78px;max-width:none;margin-inline:0}
+  .sheet-wrap{position:absolute;inset:0;max-width:none;margin-inline:0}
+  #toast-root,.toast{position:absolute;bottom:150px}
+}
