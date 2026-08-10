@@ -139,5 +139,7 @@
     '</section>';
   }
 
-  (self.HJ = self.HJ || {}).today = { render: render };
+  // BP2: trendSvg is exported so trends.js reuses this exact neutral SVG (one source
+  // of truth for colour discipline) instead of copy-pasting and risking drift.
+  (self.HJ = self.HJ || {}).today = { render: render, trendSvg: trendSvg };
 })();
