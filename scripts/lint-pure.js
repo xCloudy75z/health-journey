@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
-const PURE = ['src/calc.js', 'src/format.js', 'src/schema.js', 'src/validate.js', 'src/migrate.js', 'src/store.js', 'src/entry.js']; // extend as pure modules are added
+const PURE = ['src/calc.js', 'src/format.js', 'src/schema.js', 'src/validate.js', 'src/migrate.js', 'src/store.js', 'src/entry.js', 'src/views/diet.js', 'src/views/guides.js']; // extend as pure modules are added
 const BANNED = [/new\s+Date\s*\(/, /Date\.now\s*\(/, /Math\.random\s*\(/];
 
 let violations = 0;

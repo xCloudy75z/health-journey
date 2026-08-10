@@ -31,23 +31,20 @@
     render();
   }
 
-  function placeholder(tab) {
-    return '<section class="view active" style="padding:40px 8px;text-align:center;color:var(--muted)">' +
-      '<div style="font-size:34px;margin-bottom:10px">' + tab.icon + '</div>' +
-      '<div style="font-weight:700;color:var(--text)">' + tab.label + '</div>' +
-      '<div style="font-size:13px;margin-top:6px">Coming next.</div></section>';
-  }
-
   function viewHtml(tab) {
     if (tab.id === 'today') return HJ.today.render(store, todayStr);
     if (tab.id === 'diet') return HJ.diet.render();
     if (tab.id === 'guides') return HJ.guides.render(guidesSub);
     if (tab.id === 'trends') return HJ.trends.render(store, todayStr);
     if (tab.id === 'report') return HJ.report.render(store, todayStr);
-    return placeholder(tab);
+    return '';   // A13: all five tabs are handled above; no placeholder fallback needed.
   }
 
   function render() {
+    // A3: never re-render while a log/backup sheet is open — the sheet is appended into
+    // #app, so replacing #app.innerHTML here would silently wipe a half-typed entry and
+    // bypass the discard-confirm. Bail; the sheet's own onSaved/onClose re-renders after.
+    if (document.querySelector('.sheet-wrap.open')) return;
     todayStr = localYMD(new Date());   // BB4: refresh the day on every render
     var app = document.getElementById('app');
     var tab = TABS.filter(function (t) { return t.id === active; })[0];
@@ -105,8 +102,13 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();
 
-  // BB4: re-render when the PWA returns to the foreground (resume / bfcache restore),
-  // so the day rolls over even without a full reload.
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
-  window.addEventListener('pageshow', function () { render(); });
+  // BB4 + A3: re-render when the PWA returns to the foreground (resume / bfcache restore)
+  // ONLY when the calendar day actually changed — an unconditional re-render on every
+  // resume risks wiping an open sheet and does needless work. render() itself also bails
+  // under an open sheet, so this is belt-and-braces.
+  function rerenderIfDayChanged() {
+    if (localYMD(new Date()) !== todayStr) render();
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) rerenderIfDayChanged(); });
+  window.addEventListener('pageshow', function (event) { if (event && event.persisted) rerenderIfDayChanged(); });
 })();
