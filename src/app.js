@@ -43,6 +43,7 @@
     if (tab.id === 'diet') return HJ.diet.render();
     if (tab.id === 'guides') return HJ.guides.render(guidesSub);
     if (tab.id === 'trends') return HJ.trends.render(store, todayStr);
+    if (tab.id === 'report') return HJ.report.render(store, todayStr);
     return placeholder(tab);
   }
 
@@ -72,6 +73,14 @@
     if (logBtn) logBtn.addEventListener('click', function () {
       todayStr = localYMD(new Date());   // BB4: fresh day at the moment the sheet opens
       HJ.logSheet.open(store, todayStr, render);
+    });
+    // B6: Report tab actions — print the sheet, or open the backup/export sheet so
+    // Dr Ola's printed copy and an off-device backup are one tap apart.
+    var repPrint = document.getElementById('repPrintBtn');
+    if (repPrint) repPrint.addEventListener('click', function () { window.print(); });
+    var repExport = document.getElementById('repExportBtn');
+    if (repExport) repExport.addEventListener('click', function () {
+      HJ.backupSheet.open(store, new Date().toISOString(), render);
     });
     [].forEach.call(app.querySelectorAll('.tab'), function (btn) {
       // B4: switching tabs always returns Guides to its index (never lands mid-detail).
