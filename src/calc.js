@@ -82,7 +82,53 @@
       netWeightChange: (first != null && last != null) ? (last - first) : null
     };
   }
+  // B6: Day-30 report assembly. Pure — no wall-clock reads; every window is derived
+  // from the explicit day1Str/todayStr passed in. Assembles the six report figures.
+  function inWindow(dateStr, startStr, endStr) {
+    return daysBetween(startStr, dateStr) >= 0 && daysBetween(dateStr, endStr) >= 0;
+  }
+  function windowAvg(logs, startStr, endStr) {
+    var vals = logs.filter(function (l) {
+      return l && typeof l.weightKg === 'number' && inWindow(l.date, startStr, endStr);
+    }).map(function (l) { return l.weightKg; });
+    if (!vals.length) return { avg: null, n: 0 };
+    return { avg: vals.reduce(function (a, b) { return a + b; }, 0) / vals.length, n: vals.length };
+  }
+  function percentChange(from, to) {
+    if (typeof from !== 'number' || typeof to !== 'number' || from === 0) return null;
+    return (to - from) / from * 100;
+  }
+  function reportData(logs, scans, targets, todayStr, day1Str) {
+    var w1s = day1Str, w1e = addDays(day1Str, 6);              // Day 1..7
+    var w4s = addDays(day1Str, 23), w4e = addDays(day1Str, 29); // Day 24..30 — trailing 7 to the review (BP2)
+    var week1 = windowAvg(logs, w1s, w1e), week4 = windowAvg(logs, w4s, w4e);
+    var deltaKg = (week1.avg != null && week4.avg != null) ? (week4.avg - week1.avg) : null;
+    var deltaPct = (week1.avg != null && week4.avg != null) ? percentChange(week1.avg, week4.avg) : null;
+    var dose = doseTally(logs, todayStr, day1Str);
+    var sideEffectsByDay = logs.filter(function (l) { return l && typeof l.sideEffects === 'number'; })
+      .map(function (l) { return { day: dayNumber(l.date, day1Str), level: l.sideEffects }; })
+      .sort(function (a, b) { return a.day - b.day; });
+    // BP1: Seca scans are snake_case on disk. BP3: date-sort before choosing endpoints.
+    var sc = (Array.isArray(scans) ? scans.slice() : []).sort(function (x, y) {
+      return x.date < y.date ? -1 : x.date > y.date ? 1 : 0;
+    });
+    var scanInfo = { available: sc.length >= 2 };
+    if (scanInfo.available) {
+      var a = sc[0], b = sc[sc.length - 1];
+      scanInfo.fatPctDelta = b.fat_mass_percent - a.fat_mass_percent;
+      scanInfo.fatKgDelta = b.fat_mass_kg - a.fat_mass_kg;
+      scanInfo.muscleKgDelta = b.skeletal_muscle_kg - a.skeletal_muscle_kg;
+      scanInfo.visceralDelta = (b.visceral_fat != null && a.visceral_fat != null) ? (b.visceral_fat - a.visceral_fat) : null;
+      scanInfo.from = a.date; scanInfo.to = b.date;
+    }
+    return {
+      week1: week1, week4: week4, weightDeltaKg: deltaKg, weightDeltaPct: deltaPct,
+      dose: dose, sideEffectsByDay: sideEffectsByDay, scans: scanInfo, targets: targets || {},
+      daysLogged: logs.length
+    };
+  }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
            sevenDayAvg: sevenDayAvg, doseTally: doseTally, addDays: addDays,
-           withinTrailing7: withinTrailing7, logStats: logStats };
+           withinTrailing7: withinTrailing7, logStats: logStats,
+           windowAvg: windowAvg, percentChange: percentChange, reportData: reportData };
 });

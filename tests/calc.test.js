@@ -1,7 +1,8 @@
 // tests/calc.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays, logStats } = require('../src/calc.js');
+const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays, logStats,
+        windowAvg, percentChange, reportData } = require('../src/calc.js');
 
 const DAY1 = '2026-08-10';
 
@@ -117,4 +118,63 @@ test('logStats handles empty logs without NaN', () => {
   assert.strictEqual(s.firstWeight, null);
   assert.strictEqual(s.latestWeight, null);
   assert.strictEqual(s.netWeightChange, null);
+});
+
+// ---- Bundle 6: Day-30 report ----
+
+test('windowAvg = mean of non-null weights within [start,end] inclusive', () => {
+  const logs = [
+    {date:'2026-08-10', weightKg:110}, {date:'2026-08-11', weightKg:109.6},
+    {date:'2026-08-12', weightKg:null}, {date:'2026-08-20', weightKg:108}
+  ];
+  const r = windowAvg(logs, '2026-08-10', '2026-08-16');
+  assert.strictEqual(r.n, 2);
+  assert.ok(Math.abs(r.avg - 109.8) < 1e-9);
+  assert.strictEqual(windowAvg(logs, '2026-09-01','2026-09-07').avg, null); // none → null
+});
+
+test('percentChange signed relative to the start value', () => {
+  assert.ok(Math.abs(percentChange(110, 108.9) - (-1.0)) < 1e-6);
+  assert.strictEqual(percentChange(0, 5), null);   // guard divide-by-zero
+  assert.strictEqual(percentChange(null, 5), null);
+});
+
+test('reportData assembles week1 vs week4 + dose + sideEffects, pending when sparse', () => {
+  // BP2: build 30 days (Day 1..30) so the Day 24..30 week-4 window is exercised.
+  const logs = [];
+  for (let i=0;i<30;i++){
+    const d = new Date(Date.UTC(2026,7,10+i,12));
+    const ds = d.toISOString().slice(0,10);
+    logs.push({date:ds, weightKg: 110 - i*0.15, walkedMin:30, dose: i%10===0?'incorrect':'correct', sideEffects: i<3?1:0, adherence:3});
+  }
+  const rd = reportData(logs, [], {kcal:1729, protein:145, carbs:119, fat:72}, '2026-09-08', DAY1);
+  assert.ok(rd.week1.avg > rd.week4.avg);                 // lost weight
+  assert.ok(rd.weightDeltaKg < 0);
+  assert.ok(rd.weightDeltaPct < 0);
+  assert.ok(rd.dose.completed > 0 && rd.dose.rate >= 0 && rd.dose.rate <= 1);
+  assert.strictEqual(rd.scans.available, false);          // no scans → pending
+  assert.strictEqual(rd.targets.kcal, 1729);
+  assert.ok(Array.isArray(rd.sideEffectsByDay));
+  // BP5: pin the windows with exact-value assertions so a wrong window can't ship silently.
+  assert.ok(Math.abs(rd.week1.avg - 109.55) < 1e-9);      // mean of Day 1..7 weights
+  assert.ok(Math.abs(rd.week4.avg - 106.1) < 1e-9);       // mean of Day 24..30 weights
+  assert.ok(Math.abs(rd.weightDeltaKg - (-3.45)) < 1e-9);
+  assert.strictEqual(rd.week1.n, 7);
+  assert.strictEqual(rd.week4.n, 7);
+});
+
+test('reportData reads snake_case Seca scans (BP1) and sorts them (BP3)', () => {
+  // On-disk Seca shape is snake_case; feed the two real baseline scans out of order.
+  const scans = [
+    { date:'2026-08-07', fat_mass_percent:46.5, fat_mass_kg:51.08, skeletal_muscle_kg:30.2, visceral_fat:null },
+    { date:'2025-10-01', fat_mass_percent:46.2, fat_mass_kg:50.38, skeletal_muscle_kg:29.31, visceral_fat:null }
+  ];
+  const rd = reportData([], scans, {}, '2026-09-08', DAY1);
+  assert.strictEqual(rd.scans.available, true);
+  assert.strictEqual(rd.scans.from, '2025-10-01');        // BP3: earliest first
+  assert.strictEqual(rd.scans.to, '2026-08-07');          // BP3: latest last
+  assert.ok(Math.abs(rd.scans.muscleKgDelta - 0.89) < 1e-9);  // real number, not NaN
+  assert.ok(Math.abs(rd.scans.fatKgDelta - 0.70) < 1e-9);
+  assert.ok(Math.abs(rd.scans.fatPctDelta - 0.30) < 1e-9);
+  assert.strictEqual(rd.scans.visceralDelta, null);       // both null → not measured
 });
