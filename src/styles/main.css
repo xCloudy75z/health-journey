@@ -42,8 +42,9 @@ input{font:inherit}
 .hb{display:flex;gap:8px}
 .icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);
   color:var(--text);display:inline-flex;align-items:center;justify-content:center;font-size:15px}
-/* .body clears the fixed tab bar (rem-money padding-bottom). */
-.body{padding:6px 18px 110px}
+/* .body clears the fixed tab bar AND the floating "＋ Log today" CTA above it (A10:
+   the old 110px let the last content — the backup banner — sit under the CTA). */
+.body{padding:6px 18px calc(170px + env(safe-area-inset-bottom))}
 
 .view{display:none}
 .view.active{display:block;animation:fade .18s ease}
@@ -188,6 +189,18 @@ input{font:inherit}
 .seg.dose button.sel.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
 .seg.dose button.sel.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
 .save-row{position:sticky;bottom:0;background:var(--surface);padding-top:10px;margin-top:6px}
+/* A12: the "tap again to clear" hint shown under a single-select segment once something
+   is picked (toggled by logSheet.js). */
+.seg-hint{font-size:11.5px;color:var(--muted);margin-top:7px}
+
+/* ============ A11: 44px minimum tap targets ============ */
+/* WCAG-style min hit area. Flex/full-width controls just grow to 44px tall; the small
+   round icon buttons keep their visual size and gain an invisible 44px hit overlay so
+   the circle still looks the same. */
+.qa,.seg button,.backlink{min-height:44px}
+.icon-btn,.sheet-close{position:relative}
+.icon-btn::after,.sheet-close::after{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);min-width:44px;min-height:44px;width:100%;height:100%}
 
 /* ============ TOAST ============ */
 #toast-root{position:fixed;left:0;right:0;bottom:calc(150px + env(safe-area-inset-bottom));z-index:120;pointer-events:none;max-width:var(--container);margin-inline:auto}
@@ -235,6 +248,15 @@ input{font:inherit}
 /* Hide app chrome (tab bar, header, log/backup buttons, the phone frame) so the
    Report tab prints as a plain document Dr Ola can keep. */
 @media print {
+  /* A4: force the LIGHT palette regardless of the in-app theme, so a Report printed in
+     dark mode is not light-grey text on white (invisible). Redeclare the neutral tokens
+     on both :root and the dark override, at print time only. */
+  :root, :root[data-theme="dark"], :root[data-theme="light"] {
+    --bg:#e9eeec; --surface:#fff; --surface-2:#f3f7f5; --surface-3:#e7eeeb;
+    --text:#14201e; --muted:#63756f; --border:#e0e8e4;
+    --accent:#2f9e8f; --accent-strong:#217d70; --accent-soft:rgba(47,158,143,.12);
+    --good:#2f9e6a; --warn:#c68a1e; --warn-soft:rgba(198,138,30,.16); --bad:#c0453b;
+  }
   .tabbar,.app-header,.log-cta,.icon-btn,button{display:none!important}
   .body{padding:0}
   #app{max-width:none;height:auto;border:none;border-radius:0;box-shadow:none;overflow:visible}
