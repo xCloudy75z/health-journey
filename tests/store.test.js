@@ -27,6 +27,17 @@ test('setDay MERGES — a partial update never nulls a populated field', () => {
   assert.strictEqual(d.note, 'ok');
 });
 
+// A8 — an explicit null in a partial must NOT wipe a populated field (only a real value overwrites).
+test('setDay({weightKg:null}) does NOT wipe a stored weight (A8)', () => {
+  const s = createStore(fakeStorage());
+  s.setDay('2026-08-10', { weightKg: 109.5, dose: 'correct' });
+  s.setDay('2026-08-10', { weightKg: null, sideEffects: 1 });   // null must be ignored by the merge
+  const d = s.getDay('2026-08-10');
+  assert.strictEqual(d.weightKg, 109.5, 'null did not null the stored weight');
+  assert.strictEqual(d.dose, 'correct');
+  assert.strictEqual(d.sideEffects, 1);
+});
+
 test('setDay can explicitly overwrite a field when a new value is given', () => {
   const s = createStore(fakeStorage());
   s.setDay('2026-08-10', { weightKg: 109.5 });
@@ -78,6 +89,30 @@ test('import REJECTS a payload with a malformed dailyLogs item; prior data untou
   assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'existing data untouched after a rejected import');
   assert.strictEqual(s.getDay('2026-08-10').dose, 'correct');
   assert.strictEqual(s.allLogs().length, 1);
+});
+
+// A1/A7 — a rejected import (non-array scans) must leave prior state untouched.
+test('import REJECTS a non-array scans payload; prior data untouched (A1)', () => {
+  const s = createStore(fakeStorage());
+  s.setDay('2026-08-10', { weightKg: 109.5, dose: 'correct' });
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 1, state: { dailyLogs: [], scans: { bad: true } } });
+  assert.strictEqual(res.ok, false);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'existing data untouched after a rejected import');
+  assert.strictEqual(s.allLogs().length, 1);
+});
+
+// A7 — duplicate dates in an imported payload are de-duplicated (last wins).
+test('import DEDUPS duplicate dates, last wins (A7)', () => {
+  const s = createStore(fakeStorage());
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 1, state: { dailyLogs: [
+    { date: '2026-08-10', weightKg: 110, dose: 'correct', walkedMin: null, sideEffects: null, adherence: null, note: '' },
+    { date: '2026-08-11', weightKg: 109, dose: 'correct', walkedMin: null, sideEffects: null, adherence: null, note: '' },
+    { date: '2026-08-10', weightKg: 108, dose: 'missed', walkedMin: null, sideEffects: null, adherence: null, note: '' }
+  ] } });
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(s.allLogs().length, 2, 'the duplicate 2026-08-10 collapsed to one');
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 108, 'last write wins');
+  assert.strictEqual(s.getDay('2026-08-10').dose, 'missed', 'last write wins');
 });
 
 test('import keeps UNDO — snapshot before, restore after', () => {

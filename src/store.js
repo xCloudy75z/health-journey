@@ -38,7 +38,9 @@
       var base = idx >= 0 ? state.dailyLogs[idx] : schema.emptyDay(date);
       var merged = {};
       for (var k in base) if (base.hasOwnProperty(k)) merged[k] = base[k];
-      for (var p in partial) if (partial.hasOwnProperty(p) && partial[p] !== undefined) merged[p] = partial[p];
+      // A8: only a real value overwrites. An explicit null (or undefined) in a partial
+      // must NOT wipe a populated field — the field-level merge preserves the prior value.
+      for (var p in partial) if (partial.hasOwnProperty(p) && partial[p] !== undefined && partial[p] !== null) merged[p] = partial[p];
       merged.date = date;
       if (idx >= 0) state.dailyLogs[idx] = merged; else state.dailyLogs.push(merged);
       persist();
@@ -54,7 +56,19 @@
       var v = deps.validate.validateImport(payload);
       if (!v.ok) return { ok: false, error: v.error };
       var migrated = deps.migrate.migrate(payload);
-      state = clone(migrated.state);   // deep-clone: never share a reference with the imported payload
+      var next = clone(migrated.state);   // deep-clone: never share a reference with the imported payload
+      // A7: de-duplicate dailyLogs by date (last wins) so an imported payload with a
+      // repeated date collapses to a single entry instead of shadowing later reads.
+      if (Array.isArray(next.dailyLogs)) {
+        var byDate = {}, order = [];
+        for (var i = 0; i < next.dailyLogs.length; i++) {
+          var day = next.dailyLogs[i], dt = day && day.date;
+          if (!byDate.hasOwnProperty(dt)) order.push(dt);
+          byDate[dt] = day;   // last write for this date wins
+        }
+        next.dailyLogs = order.map(function (dt) { return byDate[dt]; });
+      }
+      state = next;
       persist();
       return { ok: true };
     }
