@@ -10,6 +10,7 @@
     { id: 'report', icon: '🩺', label: 'Report' }
   ];
   var active = 'today';
+  var guidesSub = null;   // B4: null = the Guides index; a guide id = that guide's detail.
 
   // Local Y-M-D — never toISOString() (UTC would mislabel 00:00–04:00 Dubai). (C2)
   function localYMD(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -40,6 +41,7 @@
   function viewHtml(tab) {
     if (tab.id === 'today') return HJ.today.render(store, todayStr);
     if (tab.id === 'diet') return HJ.diet.render();
+    if (tab.id === 'guides') return HJ.guides.render(guidesSub);
     return placeholder(tab);
   }
 
@@ -71,8 +73,15 @@
       HJ.logSheet.open(store, todayStr, render);
     });
     [].forEach.call(app.querySelectorAll('.tab'), function (btn) {
-      btn.addEventListener('click', function () { active = btn.getAttribute('data-tab'); render(); });
+      // B4: switching tabs always returns Guides to its index (never lands mid-detail).
+      btn.addEventListener('click', function () { active = btn.getAttribute('data-tab'); guidesSub = null; render(); });
     });
+    // B4: Guides index↔detail nav. A card opens its guide; the back link clears to the index.
+    [].forEach.call(app.querySelectorAll('[data-guide]'), function (btn) {
+      btn.addEventListener('click', function () { guidesSub = btn.getAttribute('data-guide'); render(); });
+    });
+    var guidesHome = app.querySelector('[data-guides-home]');
+    if (guidesHome) guidesHome.addEventListener('click', function () { guidesSub = null; render(); });
     // BB9: tap (or keyboard-activate) a recent day to edit/backfill that date.
     [].forEach.call(app.querySelectorAll('.row-tap[data-date]'), function (row) {
       function openDay() { HJ.logSheet.open(store, row.getAttribute('data-date'), render); }
