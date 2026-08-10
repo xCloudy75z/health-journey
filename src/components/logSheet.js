@@ -38,28 +38,31 @@
           '<div class="field">' +
             '<label>Medicine taken correctly?</label>' +
             '<div class="seg dose" id="ls-dose">' +
-              '<button type="button" data-value="correct" data-kind="ok">✓ Correct</button>' +
-              '<button type="button" data-value="incorrect" data-kind="no">Incorrect</button>' +
-              '<button type="button" data-value="missed" data-kind="no">Missed</button>' +
+              '<button type="button" data-value="correct" data-kind="ok" aria-pressed="false">✓ Correct</button>' +
+              '<button type="button" data-value="incorrect" data-kind="no" aria-pressed="false">Incorrect</button>' +
+              '<button type="button" data-value="missed" data-kind="no" aria-pressed="false">Missed</button>' +
             '</div>' +
+            '<div class="seg-hint" hidden>Tap the selected option again to clear it.</div>' +
           '</div>' +
           '<div class="field">' +
             '<label>Side effects</label>' +
             '<div class="seg" id="ls-side">' +
-              '<button type="button" data-value="0">0 · None</button>' +
-              '<button type="button" data-value="1">1 · Mild</button>' +
-              '<button type="button" data-value="2">2 · Disruptive</button>' +
-              '<button type="button" data-value="3">3 · Stopped me</button>' +
+              '<button type="button" data-value="0" aria-pressed="false">0 · None</button>' +
+              '<button type="button" data-value="1" aria-pressed="false">1 · Mild</button>' +
+              '<button type="button" data-value="2" aria-pressed="false">2 · Disruptive</button>' +
+              '<button type="button" data-value="3" aria-pressed="false">3 · Stopped me</button>' +
             '</div>' +
+            '<div class="seg-hint" hidden>Tap the selected option again to clear it.</div>' +
           '</div>' +
           '<div class="field">' +
             '<label>Stuck to the plan?</label>' +
             '<div class="seg" id="ls-adh">' +
-              '<button type="button" data-value="0">0 · Off</button>' +
-              '<button type="button" data-value="1">1 · Partial</button>' +
-              '<button type="button" data-value="2">2 · Mostly</button>' +
-              '<button type="button" data-value="3">3 · Fully</button>' +
+              '<button type="button" data-value="0" aria-pressed="false">0 · Off</button>' +
+              '<button type="button" data-value="1" aria-pressed="false">1 · Partial</button>' +
+              '<button type="button" data-value="2" aria-pressed="false">2 · Mostly</button>' +
+              '<button type="button" data-value="3" aria-pressed="false">3 · Fully</button>' +
             '</div>' +
+            '<div class="seg-hint" hidden>Tap the selected option again to clear it.</div>' +
           '</div>' +
           '<div class="field">' +
             '<label>Note (optional)</label>' +
@@ -71,6 +74,7 @@
     );
     host.appendChild(wrap);
 
+    var sheet = wrap.querySelector('.sheet');
     var elWeight = wrap.querySelector('#ls-weight');
     var elWalked = wrap.querySelector('#ls-walked');
     var segDose = wrap.querySelector('#ls-dose');
@@ -95,6 +99,19 @@
     var errEl = wrap.querySelector('#ls-weight-err');
     function clearWeightError() { elWeight.classList.remove('error'); if (errEl) errEl.hidden = true; }
 
+    // A12: keep aria-pressed in sync with the visual selection and reveal the "tap again
+    // to clear" hint once something is picked (the hint is the .seg-hint sibling in .field).
+    function syncSegState(seg) {
+      var anySel = false;
+      [].forEach.call(seg.querySelectorAll('button'), function (x) {
+        var sel = x.classList.contains('sel');
+        x.setAttribute('aria-pressed', sel ? 'true' : 'false');
+        if (sel) anySel = true;
+      });
+      var hint = seg.parentNode && seg.parentNode.querySelector('.seg-hint');
+      if (hint) hint.hidden = !anySel;
+    }
+
     // Segment single-select with toggle-off (click a selected chip to clear it → unset).
     function wireSeg(seg, isDose) {
       seg.addEventListener('click', function (e) {
@@ -103,6 +120,7 @@
         var wasSel = b.classList.contains('sel');
         [].forEach.call(seg.querySelectorAll('button'), function (x) { x.classList.remove('sel', 'ok', 'no'); });
         if (!wasSel) { b.classList.add('sel'); if (isDose && b.getAttribute('data-kind')) b.classList.add(b.getAttribute('data-kind')); }
+        syncSegState(seg);
       });
     }
     wireSeg(segDose, true); wireSeg(segSide, false); wireSeg(segAdh, false);
@@ -134,9 +152,25 @@
           var kind = b.getAttribute('data-kind'); if (kind) b.classList.add(kind);
         }
       });
+      syncSegState(seg);   // A12: prefill keeps aria-pressed + the clear-hint accurate
     }
 
-    function close() { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+    // A5: keep the sheet — and its sticky Save row — above the on-screen keyboard. iOS
+    // Safari does not honour the viewport `interactive-widget` hint, so instead we watch
+    // window.visualViewport and lift the sheet by however much the keyboard covers. Fully
+    // defensive: a no-op where visualViewport is unavailable (older browsers / desktop).
+    var vv = (typeof window !== 'undefined') ? window.visualViewport : null;
+    function liftForKeyboard() {
+      if (!vv || !sheet) return;
+      var covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      sheet.style.transform = covered > 4 ? 'translateY(-' + covered + 'px)' : '';
+    }
+    if (vv) { vv.addEventListener('resize', liftForKeyboard); vv.addEventListener('scroll', liftForKeyboard); }
+
+    function close() {
+      if (vv) { vv.removeEventListener('resize', liftForKeyboard); vv.removeEventListener('scroll', liftForKeyboard); }
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    }
     // BB12: a scrim/✕ dismissal on a dirty entry confirms before discarding.
     wrap.addEventListener('click', function (e) {
       if (e.target.getAttribute && e.target.getAttribute('data-close')) {

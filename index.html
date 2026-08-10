@@ -2,7 +2,9 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<!-- A5: no `interactive-widget` here — iOS Safari ignores it; the log sheet tracks
+     window.visualViewport instead to keep Save above the keyboard (see logSheet.js). -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Health Journey</title>
 <meta name="theme-color" content="#1a2220" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#e9eeec" media="(prefers-color-scheme: light)">
