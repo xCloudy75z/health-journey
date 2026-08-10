@@ -1,7 +1,7 @@
 // tests/calc.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays } = require('../src/calc.js');
+const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays, logStats } = require('../src/calc.js');
 
 const DAY1 = '2026-08-10';
 
@@ -89,4 +89,32 @@ test('doseTally: rate is null (not 0) when there are no completed doses yet', ()
   assert.strictEqual(t.completed, 0);
   assert.strictEqual(t.unconfirmed, 2, 'unconfirmed still counted separately');
   assert.strictEqual(t.rate, null);
+});
+
+test('logStats aggregates weigh-ins, walking, adherence, side-effects, weight change', () => {
+  const logs = [
+    { date:'2026-08-10', weightKg:110.0, walkedMin:30, dose:'correct', sideEffects:1, adherence:3 },
+    { date:'2026-08-11', weightKg:109.6, walkedMin:0,  dose:'correct', sideEffects:0, adherence:1 },
+    { date:'2026-08-12', weightKg:null,  walkedMin:20, dose:'incorrect', sideEffects:2, adherence:2 },
+    { date:'2026-08-13', weightKg:109.2, walkedMin:30, dose:null,        sideEffects:0, adherence:3 },
+  ];
+  const s = logStats(logs);
+  assert.strictEqual(s.weighIns, 3);                 // non-null weights
+  assert.strictEqual(s.walkedDays, 3);               // walkedMin > 0
+  assert.strictEqual(s.walkedTotalMin, 80);
+  assert.strictEqual(s.firstWeight, 110.0);
+  assert.strictEqual(s.latestWeight, 109.2);
+  assert.ok(Math.abs(s.netWeightChange - (-0.8)) < 1e-9); // latest - first
+  assert.strictEqual(s.adherence.mostlyOrFully, 3);  // adherence >= 2
+  assert.strictEqual(s.sideEffects.worst, 2);
+  assert.strictEqual(s.daysLogged, 4);
+});
+
+test('logStats handles empty logs without NaN', () => {
+  const s = logStats([]);
+  assert.strictEqual(s.daysLogged, 0);
+  assert.strictEqual(s.weighIns, 0);
+  assert.strictEqual(s.firstWeight, null);
+  assert.strictEqual(s.latestWeight, null);
+  assert.strictEqual(s.netWeightChange, null);
 });

@@ -55,7 +55,34 @@
     t.rate = t.completed > 0 ? t.correct / t.completed : null;
     return t;
   }
+  // B5: overall/weekly-review aggregates from the on-device daily logs. Pure — no
+  // wall-clock reads. netWeightChange is all-time (first→latest non-null weight),
+  // NOT weekly; the view labels it "since Day 1" so it can't read as contradicting
+  // the 7-day average (BP5). Empty/sparse logs yield null (never NaN).
+  function logStats(logs) {
+    var sorted = logs.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var weights = sorted.filter(function (l) { return typeof l.weightKg === 'number'; });
+    var walkedDays = 0, walkedTotalMin = 0, mostlyOrFully = 0, worst = 0;
+    sorted.forEach(function (l) {
+      if (typeof l.walkedMin === 'number' && l.walkedMin > 0) { walkedDays++; walkedTotalMin += l.walkedMin; }
+      if (typeof l.adherence === 'number' && l.adherence >= 2) mostlyOrFully++;
+      if (typeof l.sideEffects === 'number' && l.sideEffects > worst) worst = l.sideEffects;
+    });
+    var first = weights.length ? weights[0].weightKg : null;
+    var last = weights.length ? weights[weights.length - 1].weightKg : null;
+    return {
+      daysLogged: sorted.length,
+      weighIns: weights.length,
+      walkedDays: walkedDays,
+      walkedTotalMin: walkedTotalMin,
+      adherence: { mostlyOrFully: mostlyOrFully },
+      sideEffects: { worst: worst },
+      firstWeight: first,
+      latestWeight: last,
+      netWeightChange: (first != null && last != null) ? (last - first) : null
+    };
+  }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
            sevenDayAvg: sevenDayAvg, doseTally: doseTally, addDays: addDays,
-           withinTrailing7: withinTrailing7 };
+           withinTrailing7: withinTrailing7, logStats: logStats };
 });
