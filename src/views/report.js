@@ -44,8 +44,10 @@
   function render(store, todayStr) {
     var DAY1 = HJ.schema.DAY1;
     var logs = store.allLogs();
-    // BP6: guard against imported/older state that omits scans.
-    var scans = store.getState().scans || [];
+    // BP6 + A1: guard against imported/older state that omits scans OR carries a non-array
+    // scans (the sort/slice below would otherwise crash the whole Report view).
+    var scans = store.getState().scans;
+    if (!Array.isArray(scans)) scans = [];
     var rd = HJ.calc.reportData(logs, scans, HJ.schema.TARGETS, todayStr, DAY1);
     var stats = HJ.calc.logStats(logs);
     var dayN = Math.max(1, HJ.calc.dayNumber(todayStr, DAY1));
@@ -129,7 +131,10 @@
 
     // ---- 5. Intake vs target ----
     var t = rd.targets || {};
-    var adhPct = stats.daysLogged > 0 ? Math.round(stats.adherence.mostlyOrFully / stats.daysLogged * 100) : null;
+    // A9: denominator = days that carry a numeric self-rating (adherence.rated), NOT every
+    // logged day — an un-rated day must not read as non-adherence.
+    var adhRated = stats.adherence.rated;
+    var adhPct = adhRated > 0 ? Math.round(stats.adherence.mostlyOrFully / adhRated * 100) : null;
     var intakeCard = '<div class="card">' +
       row('Plan total <span style="color:var(--muted)">Dr Ola\'s</span>',
           (t.kcal != null ? t.kcal.toLocaleString('en-US') : '—') + ' <span style="color:var(--muted);font-weight:500">kcal</span>') +
@@ -137,7 +142,7 @@
       (t.fibre != null ? row('Fibre', num(t.fibre, 0) + ' <span style="color:var(--muted);font-weight:500">g</span>') : '') +
       row('Adherence <span style="color:var(--muted)">self-rated</span>',
           adhPct != null
-            ? '<span style="color:var(--muted)">mostly/fully ' + stats.adherence.mostlyOrFully + ' of ' + stats.daysLogged + ' days · ' + adhPct + '%</span>'
+            ? '<span style="color:var(--muted)">mostly/fully ' + stats.adherence.mostlyOrFully + ' of ' + adhRated + ' rated day' + (adhRated === 1 ? '' : 's') + ' · ' + adhPct + '%</span>'
             : '<span style="color:var(--muted)">collecting…</span>') +
       '<div class="flag" style="margin-top:10px">This is the <b>planned</b> intake. The app does not track grams actually eaten — adherence above is A\'s own self-rating, not a measured calorie count.</div>' +
     '</div>';

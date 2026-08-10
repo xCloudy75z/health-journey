@@ -107,8 +107,24 @@ test('logStats aggregates weigh-ins, walking, adherence, side-effects, weight ch
   assert.strictEqual(s.latestWeight, 109.2);
   assert.ok(Math.abs(s.netWeightChange - (-0.8)) < 1e-9); // latest - first
   assert.strictEqual(s.adherence.mostlyOrFully, 3);  // adherence >= 2
+  assert.strictEqual(s.adherence.rated, 4);          // A9: all 4 days carry a numeric adherence
   assert.strictEqual(s.sideEffects.worst, 2);
   assert.strictEqual(s.daysLogged, 4);
+});
+
+// A9 — the adherence denominator is days-with-a-numeric-adherence, NOT daysLogged.
+// An un-rated day must not read as non-adherence.
+test('logStats.adherence.rated counts only days with a numeric adherence (A9)', () => {
+  const logs = [
+    { date:'2026-08-10', adherence:3 },
+    { date:'2026-08-11', adherence:null },   // logged (e.g. weight only), adherence not rated
+    { date:'2026-08-12' },                    // no adherence field at all
+    { date:'2026-08-13', adherence:2 },
+  ];
+  const s = logStats(logs);
+  assert.strictEqual(s.daysLogged, 4);
+  assert.strictEqual(s.adherence.rated, 2, 'only the 2 days with a numeric adherence count');
+  assert.strictEqual(s.adherence.mostlyOrFully, 2);
 });
 
 test('logStats handles empty logs without NaN', () => {

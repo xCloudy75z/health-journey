@@ -104,7 +104,8 @@
     var day30 = HJ.format.formatDayMonth(HJ.calc.addDays(DAY1, 29));   // BB15: derived, not hardcoded
     var todayW = typeof today.weightKg === 'number' ? today.weightKg.toFixed(1) + ' kg' : '—';
     var pct = Math.max(0, Math.min(100, Math.round((dayN / 30) * 100)));
-    var dayLabel = dayN >= 1 ? 'Day ' + dayN : 'Starts 10 Aug';
+    // A14: derive the pre-start label from DAY1 instead of hardcoding "10 Aug".
+    var dayLabel = dayN >= 1 ? 'Day ' + dayN : 'Starts ' + HJ.format.formatDayMonth(DAY1);
     var strip =
       '<div class="strip"><div class="strip-row">' +
         '<div><div class="strip-lbl">Dr Ola review</div><div class="strip-val">' + countdown + ' day' + (countdown === 1 ? '' : 's') + ' to go</div></div>' +

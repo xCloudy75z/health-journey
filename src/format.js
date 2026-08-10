@@ -5,6 +5,10 @@
   root.HJ = root.HJ || {}; root.HJ.format = api;
 })(typeof self !== 'undefined' ? self : this, function () {
   function isNum(n) { return typeof n === 'number' && !isNaN(n); }
+  // A15: the canonical HTML-escaper. CONTRACT — any view that ever renders a user-entered
+  // string (notably the daily `note`, which no view shows today) MUST pass it through esc()
+  // so a stored value can never inject markup (defence-in-depth against stored XSS).
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
   function formatKg(n) { return isNum(n) ? n.toFixed(1) + ' kg' : '—'; }
   function formatSigned(n) {
     if (!isNum(n)) return '—';
@@ -21,5 +25,5 @@
   }
   // BB15: day + month only (e.g. "8 Sep"), for the derived Day-30 label.
   function formatDayMonth(dateStr){ var d=ymd(dateStr); return d.getUTCDate()+' '+MO[d.getUTCMonth()]; }
-  return { formatKg: formatKg, formatSigned: formatSigned, formatInt: formatInt, formatDateShort: formatDateShort, formatDayMonth: formatDayMonth };
+  return { formatKg: formatKg, formatSigned: formatSigned, formatInt: formatInt, formatDateShort: formatDateShort, formatDayMonth: formatDayMonth, esc: esc };
 });

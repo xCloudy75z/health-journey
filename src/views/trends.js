@@ -16,7 +16,9 @@
   // BP3: never assume state.weekly exists (older/imported state may omit it). Latest
   // entry that actually carries a numeric waistCm wins; empty → "not measured yet".
   function latestWaist(store) {
-    var weekly = (store.getState().weekly || []).slice().sort(function (a, b) {
+    // A1: a non-array weekly (from a damaged import) must not crash .slice()/.sort() here.
+    var raw = store.getState().weekly;
+    var weekly = (Array.isArray(raw) ? raw : []).slice().sort(function (a, b) {
       return (a.date || '') < (b.date || '') ? -1 : (a.date || '') > (b.date || '') ? 1 : 0;
     });
     for (var i = weekly.length - 1; i >= 0; i--) {
@@ -44,7 +46,9 @@
     var avg = HJ.calc.sevenDayAvg(logs, todayStr);
     var tally = HJ.calc.doseTally(logs, todayStr, DAY1);
     var dayN = Math.max(1, HJ.calc.dayNumber(todayStr, DAY1));
-    var weekN = Math.floor((dayN - 1) / 7) + 1;
+    // A14: cap the week label at 4 so it agrees with the Report, whose final window (Day
+    // 24–30) is framed as "week 4". Uncapped, Day 29–30 would read "Week 5" and drift.
+    var weekN = Math.min(4, Math.floor((dayN - 1) / 7) + 1);
 
     // ---- Weight card: 7-day average + neutral net-change + neutral trend ----
     var avgLine;
@@ -105,7 +109,7 @@
       row('Waist', waistV) +
       row('Dose correct', doseV) +
       row('Walking', stats.walkedDays + ' day' + (stats.walkedDays === 1 ? '' : 's') + ' · ' + stats.walkedTotalMin + ' min') +
-      row('Plan followed', 'mostly/fully ' + stats.adherence.mostlyOrFully + ' of ' + stats.daysLogged) +
+      row('Plan followed', 'mostly/fully ' + stats.adherence.mostlyOrFully + ' of ' + stats.adherence.rated) +
       row('Side effects', sideV + ' <span style="color:var(--muted)">worst so far</span>') +
     '</div>';
 

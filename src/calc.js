@@ -62,10 +62,12 @@
   function logStats(logs) {
     var sorted = logs.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
     var weights = sorted.filter(function (l) { return typeof l.weightKg === 'number'; });
-    var walkedDays = 0, walkedTotalMin = 0, mostlyOrFully = 0, worst = 0;
+    var walkedDays = 0, walkedTotalMin = 0, mostlyOrFully = 0, adherenceRated = 0, worst = 0;
     sorted.forEach(function (l) {
       if (typeof l.walkedMin === 'number' && l.walkedMin > 0) { walkedDays++; walkedTotalMin += l.walkedMin; }
-      if (typeof l.adherence === 'number' && l.adherence >= 2) mostlyOrFully++;
+      // A9: `rated` is the true adherence denominator — days that actually carry a numeric
+      // self-rating. An un-rated day must not read as non-adherence (that's what daysLogged did).
+      if (typeof l.adherence === 'number') { adherenceRated++; if (l.adherence >= 2) mostlyOrFully++; }
       if (typeof l.sideEffects === 'number' && l.sideEffects > worst) worst = l.sideEffects;
     });
     var first = weights.length ? weights[0].weightKg : null;
@@ -75,7 +77,7 @@
       weighIns: weights.length,
       walkedDays: walkedDays,
       walkedTotalMin: walkedTotalMin,
-      adherence: { mostlyOrFully: mostlyOrFully },
+      adherence: { mostlyOrFully: mostlyOrFully, rated: adherenceRated },
       sideEffects: { worst: worst },
       firstWeight: first,
       latestWeight: last,
