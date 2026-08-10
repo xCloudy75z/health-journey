@@ -154,7 +154,7 @@
   }
   function gGrocery() {
     return detail('Grocery helper',
-      '<p style="' + PMUTED + '">Everything to cover Dr Ola\'s plan for one week — foods you like, real store prices in AED. Out of AED 500/week total, ~AED 250 is household + wife, so your food ≈ AED 250 (this uses ~207).</p>' +
+      '<p style="' + PMUTED + '">Everything to cover Dr Ola\'s plan for one week — foods you like, real store prices in AED. Food budget ≈ AED 207/week once staples are stocked.</p>' +
 
       '<div class="banner">💰 <b>≈ AED 207 / week</b> once staples are stocked · first shop ≈ AED 706 (you buy the staples + whey tub once).</div>' +
 
@@ -190,8 +190,8 @@
         '<p style="font-size:13.5px;margin:0">Whey costs ~AED 0.26 per gram of protein; chicken (~0.13) and eggs (~0.12) are about half the price. Dropping the 2nd scoop and adding ~85 g chicken keeps your day at <b>~1,700 kcal / ~145 g protein</b> (Dr Ola\'s numbers) while saving ~AED 42/week and making the whey tub last twice as long. It\'s a value swap, not a change to her plan.</p>' +
       '</div>' +
 
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 6px">From your 6 Aug receipt</div>' +
-        '<p style="font-size:13.5px;margin:0 0 6px">Carrefour basket AED 588.93, 36 items. ~45% was non-food (not judged).</p>' +
+      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 6px">From your recent shop</div>' +
+        '<p style="font-size:13.5px;margin:0 0 6px">On your last Carrefour basket, roughly 45% was non-food (not judged).</p>' +
         '<ul class="items" style="font-size:13.5px">' +
           '<li><b>Your protein game is already good</b> — eggs, YoPro, chicken cubes. Keep it.</li>' +
           '<li><b>Snacks were the biggest food slice (~AED 116)</b> — chips, cereal, sweets, noodles. Buying fewer each trip is the single highest-impact change.</li>' +

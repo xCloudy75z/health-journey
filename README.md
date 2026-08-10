@@ -4,16 +4,20 @@ A private, offline-first weight-loss tracker built as a **dependency-free, singl
 It clones the build approach of the spending-tracker app: plain HTML/CSS/vanilla JS in `src/`,
 inlined by a tiny Node script into one self-contained `dist/index.html` for GitHub Pages.
 
-> **Bundle 0 (Foundation)** ships only the generic app shell — a 5-tab bottom bar, a theme
-> toggle, and the offline plumbing. There is **no data and no personal content** here yet.
-> Real screens and A's numbers/diet/protocol arrive in later bundles via on-device import.
-
 ## Privacy — read this first
 
-**Personal data never lives in this repo.** Every file here is generic. A's weight readings,
-meals, medication log, and Dr Ola protocol are entered/imported **on the device** and stored
-locally (localStorage) — they are never committed to git and never leave the phone except via
-an explicit backup export that A controls.
+**Be honest about what is and isn't in this public repo.**
+
+- **The diet, the Rybelsus protocol, and the Guides content ARE in the public source code**
+  (see `src/views/diet.js`, `src/views/guides.js`). They are built into the app so it works
+  offline with no server. Anyone reading this repo can read the plan — that is by design, and
+  it is fine per the owner's rule below.
+- **The one hard rule: no name and no age.** The owner's name and age are never written into
+  any file, comment, doc, or commit here.
+- **Day-to-day log data stays on the device.** Weight readings, the daily medication log, side
+  effects, and body-scan numbers are entered/imported **on the phone** and stored locally
+  (localStorage). They are never committed to git and only leave the phone via an explicit
+  backup export the owner controls.
 
 ## Requirements
 
