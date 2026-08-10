@@ -39,6 +39,7 @@
 
   function viewHtml(tab) {
     if (tab.id === 'today') return HJ.today.render(store, todayStr);
+    if (tab.id === 'diet') return HJ.diet.render();
     return placeholder(tab);
   }
 
