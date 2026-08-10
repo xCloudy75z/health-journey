@@ -42,6 +42,7 @@
     if (tab.id === 'today') return HJ.today.render(store, todayStr);
     if (tab.id === 'diet') return HJ.diet.render();
     if (tab.id === 'guides') return HJ.guides.render(guidesSub);
+    if (tab.id === 'trends') return HJ.trends.render(store, todayStr);
     return placeholder(tab);
   }
 
