@@ -230,3 +230,15 @@ input{font:inherit}
   .sheet-wrap{position:absolute;inset:0;max-width:none;margin-inline:0}
   #toast-root,.toast{position:absolute;bottom:150px}
 }
+
+/* ============ PRINT: the Day-30 report as a clean sheet ============ */
+/* Hide app chrome (tab bar, header, log/backup buttons, the phone frame) so the
+   Report tab prints as a plain document Dr Ola can keep. */
+@media print {
+  .tabbar,.app-header,.log-cta,.icon-btn,button{display:none!important}
+  .body{padding:0}
+  #app{max-width:none;height:auto;border:none;border-radius:0;box-shadow:none;overflow:visible}
+  #app::before{display:none}
+  body{background:#fff}
+  .card{break-inside:avoid}
+}
