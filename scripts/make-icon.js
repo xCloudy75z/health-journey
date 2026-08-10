@@ -1,19 +1,33 @@
-// scripts/make-icon.js — writes a flat 180x180 teal PNG (no deps). Run once.
-const fs = require('fs'), zlib = require('zlib'), path = require('path');
-const W = 180, H = 180, R = 0x2f, G = 0x9e, B = 0x8f;
-function chunk(type, data) {
-  const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
-  const td = Buffer.concat([Buffer.from(type), data]);
-  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td) >>> 0);
-  return Buffer.concat([len, td, crc]);
+// scripts/make-icon.js — rasterize the Health Journey leaf mark to PNG (180/192/512).
+// Build-only. Requires devDependency @resvg/resvg-js (NOT shipped in dist — dist is a single
+// self-contained HTML + these separate committed PNG/SVG icon files). Run once to regenerate:
+//   npm i -D @resvg/resvg-js && node scripts/make-icon.js
+// The on-disk icon.svg keeps its rounded corners for browsers that render the SVG favicon.
+// The raster PNGs use a FULL-BLEED teal square (no transparent corners) so iOS home-screen and
+// Android/PWA maskable masks never expose black/gap corners — the OS applies its own rounding.
+const fs = require('fs');
+const path = require('path');
+const { Resvg } = require('@resvg/resvg-js');
+
+const TEAL = '#2f9e8f';
+// Same leaf mark as icons/icon.svg, on a full-bleed 512 canvas (rect has no rx = fills edges).
+const SVG = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">',
+  '<rect width="512" height="512" fill="', TEAL, '"/>',
+  '<path d="M352 150c0 120-70 190-160 210 10-96 70-160 160-210z" fill="#fff" opacity=".95"/>',
+  '<path d="M170 360c40-70 100-120 175-150" stroke="', TEAL,
+  '" stroke-width="16" fill="none" stroke-linecap="round"/>',
+  '</svg>'
+].join('');
+
+const OUT = path.resolve(__dirname, '..', 'icons');
+const targets = [
+  { size: 180, name: 'apple-touch-icon-180.png' },
+  { size: 192, name: 'icon-192.png' },
+  { size: 512, name: 'icon-512.png' }
+];
+for (const t of targets) {
+  const png = new Resvg(SVG, { fitTo: { mode: 'width', value: t.size } }).render().asPng();
+  fs.writeFileSync(path.join(OUT, t.name), png);
+  console.log('OK wrote ' + t.name + ' (' + t.size + 'x' + t.size + ', ' + png.length + ' bytes)');
 }
-function crc32(buf){let c=~0;for(let i=0;i<buf.length;i++){c^=buf[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xEDB88320&-(c&1));}return ~c;}
-const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(W,0); ihdr.writeUInt32BE(H,4); ihdr[8]=8; ihdr[9]=2;
-const row = Buffer.concat([Buffer.from([0]), Buffer.concat(Array.from({length:W},()=>Buffer.from([R,G,B])))]);
-const raw = Buffer.concat(Array.from({length:H},()=>row));
-const png = Buffer.concat([
-  Buffer.from([137,80,78,71,13,10,26,10]),
-  chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))
-]);
-fs.writeFileSync(path.resolve(__dirname,'..','icons','apple-touch-icon-180.png'), png);
-console.log('OK wrote apple-touch-icon-180.png');
