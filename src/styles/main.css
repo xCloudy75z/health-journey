@@ -7,13 +7,13 @@
 
 :root{
   --radius:14px; --radius-sm:10px; --pill:999px; --container:430px;
-  --bg:#e9eeec; --surface:#fff; --surface-2:#f3f7f5; --surface-3:#e7eeeb;
-  --text:#14201e; --muted:#63756f; --border:#e0e8e4;
-  --accent:#2f9e8f; --accent-strong:#217d70; --accent-soft:rgba(47,158,143,.12); --accent-text:#fff;
+  --bg:#f4f1e9; --surface:#fffdf8; --surface-2:#f1ece1; --surface-3:#e7e0d1;
+  --text:#1b2624; --muted:#6c756e; --border:#e6dccd;
+  --accent:#238a7c; --accent-strong:#1c7568; --accent-soft:rgba(35,138,124,.11); --accent-text:#fff;
   --good:#2f9e6a; --good-soft:rgba(47,158,106,.14); --warn:#c68a1e; --warn-soft:rgba(198,138,30,.16);
   --bad:#c0453b; --bad-soft:rgba(192,69,59,.14);
-  --scrim:rgba(15,32,28,.46); --glow:rgba(47,158,143,.10);
-  --shadow-1:0 1px 2px rgba(0,0,0,.07); --shadow-2:0 10px 34px rgba(15,32,28,.22); --frame:#0c1412;
+  --scrim:rgba(15,32,28,.46); --glow:rgba(35,138,124,.10);
+  --shadow-1:0 1px 2px rgba(74,60,40,.05); --shadow-2:0 10px 34px rgba(74,60,40,.10); --frame:#0c1412;
 }
 :root[data-theme="dark"]{
   --bg:#111716; --surface:#1a2220; --surface-2:#212b29; --surface-3:#2b3634;
@@ -81,6 +81,7 @@ input{font:inherit}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
 .card + .card{margin-top:10px}
+:root:not([data-theme="dark"]) .card{background:linear-gradient(180deg,var(--surface),#fbf7ef)}
 
 /* trend chart (neutral) */
 .trend{margin:6px 0 2px;width:100%;height:auto;display:block}
@@ -252,9 +253,9 @@ input{font:inherit}
      dark mode is not light-grey text on white (invisible). Redeclare the neutral tokens
      on both :root and the dark override, at print time only. */
   :root, :root[data-theme="dark"], :root[data-theme="light"] {
-    --bg:#e9eeec; --surface:#fff; --surface-2:#f3f7f5; --surface-3:#e7eeeb;
-    --text:#14201e; --muted:#63756f; --border:#e0e8e4;
-    --accent:#2f9e8f; --accent-strong:#217d70; --accent-soft:rgba(47,158,143,.12);
+    --bg:#f4f1e9; --surface:#fffdf8; --surface-2:#f1ece1; --surface-3:#e7e0d1;
+    --text:#1b2624; --muted:#6c756e; --border:#e6dccd;
+    --accent:#238a7c; --accent-strong:#1c7568; --accent-soft:rgba(35,138,124,.11);
     --good:#2f9e6a; --warn:#c68a1e; --warn-soft:rgba(198,138,30,.16); --bad:#c0453b;
   }
   .tabbar,.app-header,.log-cta,.icon-btn,button{display:none!important}
