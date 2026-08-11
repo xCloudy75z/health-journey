@@ -61,3 +61,37 @@ test('rejects out-of-range weightKg / walkedMin / severity (A7)', () => {
   assert.strictEqual(validateDay({ date: '2026-08-10', adherence: -1 }), false, 'severity < 0 → reject');
   assert.strictEqual(validateDay({ date: '2026-08-10', dose: 'sometimes' }), false, 'dose off-enum → reject');
 });
+
+test('validateDay ACCEPTS a day with a full feelings object', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: { nausea: 1, appetite: 0, energy: 2, bowels: 1, tags: ['Queasy after pill'] } };
+  assert.strictEqual(validateDay(d), true);
+});
+
+test('validateDay ACCEPTS a day with feelings omitted (backwards compatible)', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null };
+  assert.strictEqual(validateDay(d), true);
+});
+
+test('validateDay REJECTS an out-of-range feelings value', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: { nausea: 4, appetite: null, energy: null, bowels: null, tags: [] } };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS an unknown tag', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: ['made up tag'] } };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS feelings.tags that is not an array', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: 'Bloated' } };
+  assert.strictEqual(validateDay(d), false);
+});

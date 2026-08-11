@@ -4,6 +4,19 @@
   // BB3: a present field must be the right type; absent fields are allowed (merge fills them).
   function isNum(v) { return typeof v === 'number' && !isNaN(v) && isFinite(v); }
   function sevOrNull(v) { return v === null || v === undefined || (isNum(v) && v >= 0 && v <= 3); }
+  // Bundle 8: feelings is optional; when present, each 0-3 scale uses the same
+  // sevOrNull rule as sideEffects/adherence, and tags must be drawn from the fixed set.
+  function validFeelings(f) {
+    if (f === null || f === undefined) return true;
+    if (typeof f !== 'object') return false;
+    if (!sevOrNull(f.nausea) || !sevOrNull(f.appetite) || !sevOrNull(f.energy) || !sevOrNull(f.bowels)) return false;
+    if (f.tags === undefined) return true;
+    if (!Array.isArray(f.tags)) return false;
+    for (var i = 0; i < f.tags.length; i++) {
+      if (schema.ALLOWED_TAGS.indexOf(f.tags[i]) === -1) return false;
+    }
+    return true;
+  }
   // A2: a date must match YYYY-MM-DD AND round-trip through the same UTC-noon parser calc
   // uses — so an impossible date (2026-13-45, 2026-02-30) that silently rolls over is
   // rejected instead of corrupting the day / dose figures downstream.
@@ -24,6 +37,7 @@
     // A7: walkedMin, when present/non-null, must be a finite non-negative number of minutes.
     if (!(d.walkedMin === null || d.walkedMin === undefined || (isNum(d.walkedMin) && d.walkedMin >= 0))) return false;
     if (!(d.note === undefined || typeof d.note === 'string')) return false;
+    if (!validFeelings(d.feelings)) return false;                       // Bundle 8
     return true;
   }
   function validateImport(p) {
