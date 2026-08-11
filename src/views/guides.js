@@ -26,16 +26,17 @@
   }
 
   // ---- detail shell ---------------------------------------------------------
-  function detail(title, inner) {
+  function detail(kicker, title, inner) {
     return '<section class="view active" id="guides">' +
       '<button type="button" class="backlink" data-guides-home>‹ Guides</button>' +
-      '<div class="section-h" style="margin-top:4px">' + title + '</div>' +
+      '<div class="g-kicker">' + kicker + '</div>' +
+      '<div class="g-title">' + title + '</div>' +
       inner + '</section>';
   }
 
   // ---- guide: your day & meals ----------------------------------------------
   function gYourDay() {
-    return detail('Your day &amp; meals',
+    return detail('Meals', 'Your day &amp; meals',
       '<p style="' + PMUTED + '">Dr Ola\'s plan fitted to your day, with exact grams &amp; macros. Each option hits the same target, so you can swap freely. Day total ≈ 1,729 kcal · ~145 g protein.</p>' +
 
       '<div class="card meal"><h3>📚 Weekday (college)</h3>' +
@@ -103,7 +104,7 @@
       '<ul class="items">' + items + '</ul></div>';
   }
   function gSwaps() {
-    return detail('Meal swaps',
+    return detail('Swaps', 'Meal swaps',
       '<p style="' + PMUTED + '">Same plan, less boredom. For each thing in Dr Ola\'s plan, here are alternatives that keep the calories &amp; protein <b>about the same</b> — and skip everything you dislike. Mix and match. Halal.</p>' +
 
       swapCard('Instead of 100 g chicken breast', 'Protein · aim ~150 kcal, ~25–30 g protein',
@@ -153,7 +154,7 @@
     return '<div class="rep-line"><span class="k">' + label + '</span><span class="v">' + amt + '</span></div>';
   }
   function gGrocery() {
-    return detail('Grocery helper',
+    return detail('Grocery', 'Grocery helper',
       '<p style="' + PMUTED + '">Everything to cover Dr Ola\'s plan for one week — foods you like, real store prices in AED. Food budget ≈ AED 207/week once staples are stocked.</p>' +
 
       '<div class="banner">💰 <b>≈ AED 207 / week</b> once staples are stocked · first shop ≈ AED 706 (you buy the staples + whey tub once).</div>' +
@@ -210,7 +211,7 @@
       '</span><span class="v" style="font-weight:600">' + start + ' · ' + sets + '</span></div>';
   }
   function gTraining() {
-    return detail('Training plan',
+    return detail('Training', 'Training plan',
       '<div class="banner" style="background:var(--warn-soft);border-color:var(--warn)">🔒 <b>Phase 2 — NOT yet cleared by Dr Ola.</b> Right now she wants <b>walking only, 30 min/day</b>. Start this only when she clears training AND okays your left shoulder — likely ~Week 2 once you\'ve settled on the meds.</div>' +
 
       '<p style="' + PMUTED + '">Built for someone who has never trained: learn the moves first, add weight slowly, always leave reps in the tank. Form beats weight, every time.</p>' +
@@ -290,7 +291,7 @@
 
   // ---- guide: rybelsus protocol ---------------------------------------------
   function gRybelsus() {
-    return detail('Rybelsus protocol',
+    return detail('Medicine', 'Rybelsus protocol',
       '<p style="' + PMUTED + '">How to take the medicine so the dose actually counts. This is the single most important thing you log each day.</p>' +
 
       '<div class="card"><div class="section-h" style="margin:0 0 8px">The medicine</div>' +
@@ -325,7 +326,7 @@
       (price ? '<span class="v" style="font-weight:600">' + price + '</span>' : '') + '</div>';
   }
   function gGetReady() {
-    return detail('Week 1: get ready',
+    return detail('Get ready', 'Week 1: get ready',
       '<p style="' + PMUTED + '">Everything to buy and set up so you start clean on <b>Day 1 (Mon 10 Aug)</b> — food, gear, weight, movement. Prices are Carrefour estimates (AED).</p>' +
 
       '<div class="banner">🛒 <b>First shop ≈ AED 706</b>, then ~AED 207/week. The first trip is bigger because you stock staples that last weeks — mainly the Laperva whey tub (AED 421, ~2 months at 1 scoop/day).</div>' +
