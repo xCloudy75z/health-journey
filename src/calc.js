@@ -129,8 +129,21 @@
       daysLogged: logs.length
     };
   }
+  // Bundle 8: nausea-by-day timeline + free-text highlights for the report's
+  // "Symptoms & how you felt" section. Both mirror sideEffectsByDay's shape/sort.
+  function feelingsTimeline(logs, day1Str) {
+    return logs.filter(function (l) { return l && l.feelings && typeof l.feelings.nausea === 'number'; })
+      .map(function (l) { return { day: dayNumber(l.date, day1Str), nausea: l.feelings.nausea }; })
+      .sort(function (a, b) { return a.day - b.day; });
+  }
+  function noteHighlights(logs, day1Str) {
+    return logs.filter(function (l) { return l && typeof l.note === 'string' && l.note.trim() !== ''; })
+      .map(function (l) { return { day: dayNumber(l.date, day1Str), note: l.note }; })
+      .sort(function (a, b) { return a.day - b.day; });
+  }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
            sevenDayAvg: sevenDayAvg, doseTally: doseTally, addDays: addDays,
            withinTrailing7: withinTrailing7, logStats: logStats,
-           windowAvg: windowAvg, percentChange: percentChange, reportData: reportData };
+           windowAvg: windowAvg, percentChange: percentChange, reportData: reportData,
+           feelingsTimeline: feelingsTimeline, noteHighlights: noteHighlights };
 });

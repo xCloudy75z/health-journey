@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays, logStats,
-        windowAvg, percentChange, reportData } = require('../src/calc.js');
+        windowAvg, percentChange, reportData, feelingsTimeline, noteHighlights } = require('../src/calc.js');
 
 const DAY1 = '2026-08-10';
 
@@ -193,4 +193,33 @@ test('reportData reads snake_case Seca scans (BP1) and sorts them (BP3)', () => 
   assert.ok(Math.abs(rd.scans.fatKgDelta - 0.70) < 1e-9);
   assert.ok(Math.abs(rd.scans.fatPctDelta - 0.30) < 1e-9);
   assert.strictEqual(rd.scans.visceralDelta, null);       // both null → not measured
+});
+
+test('feelingsTimeline returns only days with a logged nausea value, sorted by day', () => {
+  const logs = [
+    { date: '2026-08-12', feelings: { nausea: 2 } },
+    { date: '2026-08-10', feelings: { nausea: 1 } },
+    { date: '2026-08-11' },   // no feelings at all
+    { date: '2026-08-13', feelings: { nausea: null } },   // feelings present but nausea unset
+  ];
+  const tl = feelingsTimeline(logs, '2026-08-10');
+  assert.deepStrictEqual(tl, [{ day: 1, nausea: 1 }, { day: 3, nausea: 2 }]);
+});
+
+test('feelingsTimeline returns an empty array when nothing is logged', () => {
+  assert.deepStrictEqual(feelingsTimeline([], '2026-08-10'), []);
+});
+
+test('noteHighlights returns only days with a non-empty note, sorted by day', () => {
+  const logs = [
+    { date: '2026-08-11', note: 'Queasy after the pill, settled by noon.' },
+    { date: '2026-08-10', note: 'Felt a bit sick mid-morning.' },
+    { date: '2026-08-12', note: '' },
+    { date: '2026-08-13' },
+  ];
+  const hl = noteHighlights(logs, '2026-08-10');
+  assert.deepStrictEqual(hl, [
+    { day: 1, note: 'Felt a bit sick mid-morning.' },
+    { day: 2, note: 'Queasy after the pill, settled by noon.' }
+  ]);
 });
