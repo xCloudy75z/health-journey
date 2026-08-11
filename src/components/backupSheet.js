@@ -32,7 +32,7 @@
           '<div class="field"><button class="btn" id="bk-import" type="button">⤒ Import backup (JSON)</button>' +
             '<input type="file" id="bk-file" accept="application/json,.json" style="display:none">' +
           '</div>' +
-          '<div class="banner">💾 Back up weekly — your data lives on this phone. Importing replaces everything currently in the app.</div>' +
+          '<div class="banner">💾 Back up weekly — your data lives on this phone. Importing a backup MERGES your daily logs (the most recently edited version of each day wins) — it won\'t erase a day you\'ve already logged. Any scan/weekly data in the imported file does fully replace what\'s stored.</div>' +
         '</div>' +
       '</div>'
     );
@@ -95,8 +95,8 @@
     function confirmImport(parsed) {
       banner.innerHTML =
         '<div class="banner" style="border-color:var(--warn);background:var(--warn-soft);color:var(--warn)">' +
-          'Importing replaces all current data. Continue?' +
-          '<div class="btn-row"><button class="btn btn-primary" id="bk-confirm" type="button">Replace</button>' +
+          'This will merge your daily logs with the imported file (most recent edit per day wins) and replace any scan/weekly data it contains. Continue?' +
+          '<div class="btn-row"><button class="btn btn-primary" id="bk-confirm" type="button">Import</button>' +
           '<button class="btn btn-ghost" id="bk-cancel" type="button">Cancel</button></div></div>';
       banner.querySelector('#bk-cancel').addEventListener('click', clearBanner);
       banner.querySelector('#bk-confirm').addEventListener('click', function () {
