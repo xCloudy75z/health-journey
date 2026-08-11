@@ -167,8 +167,11 @@
     // Real logged intake — only counts days inside the report window (Day1..todayStr)
     // that actually have a mealsLog. Partial coverage is stated honestly, never implied
     // as complete.
+    // Excludes "today" — a day still in progress isn't a complete day of intake,
+    // same reasoning as doseTally's today-exclusion (calc.js) — averaging in a
+    // partial day would misleadingly skew the figure.
     var intakeDays = logs.filter(function (l) {
-      return l && Array.isArray(l.mealsLog) && l.mealsLog.length > 0 &&
+      return l && Array.isArray(l.mealsLog) && l.mealsLog.length > 0 && l.date !== todayStr &&
         HJ.calc.daysBetween(DAY1, l.date) >= 0 && HJ.calc.daysBetween(l.date, todayStr) >= 0;
     });
     var loggedIntakeAvg = null;
