@@ -17,6 +17,9 @@
   function emptyDay(date) {
     return { date: date, weightKg: null, walkedMin: null, dose: null,
              sideEffects: null, adherence: null, note: '', updatedAt: null,
+             // feelings is a single nested object — store.setDay's merge is shallow/top-level,
+             // so any caller writing `feelings` must write the FULL object (all 4 scales + tags),
+             // never a partial patch, or unset fields will be silently wiped.
              feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: [] } };
   }
   function emptyState() {

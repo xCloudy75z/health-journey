@@ -8,6 +8,7 @@
   // sevOrNull rule as sideEffects/adherence, and tags must be drawn from the fixed set.
   function validFeelings(f) {
     if (f === null || f === undefined) return true;
+    if (Array.isArray(f)) return false;
     if (typeof f !== 'object') return false;
     if (!sevOrNull(f.nausea) || !sevOrNull(f.appetite) || !sevOrNull(f.energy) || !sevOrNull(f.bowels)) return false;
     if (f.tags === undefined) return true;

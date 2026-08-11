@@ -95,3 +95,10 @@ test('validateDay REJECTS feelings.tags that is not an array', () => {
     feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: 'Bloated' } };
   assert.strictEqual(validateDay(d), false);
 });
+
+test('validateDay REJECTS feelings that is an array (not an object)', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: [] };
+  assert.strictEqual(validateDay(d), false);
+});
