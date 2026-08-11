@@ -126,3 +126,21 @@ test('import keeps UNDO — snapshot before, restore after', () => {
   assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'restore undoes the import');
   assert.strictEqual(s.getDay('2026-09-01'), null);
 });
+
+test('setDay stamps updatedAt using the injected clock', () => {
+  let clock = '2026-08-10T06:00:00.000Z';
+  const s = createStore(fakeStorage(), () => clock);
+  s.setDay('2026-08-10', { weightKg: 109.5 });
+  assert.strictEqual(s.getDay('2026-08-10').updatedAt, '2026-08-10T06:00:00.000Z');
+  clock = '2026-08-10T19:00:00.000Z';
+  s.setDay('2026-08-10', { note: 'evening update' });
+  assert.strictEqual(s.getDay('2026-08-10').updatedAt, '2026-08-10T19:00:00.000Z', 'second save re-stamps');
+});
+
+test('setDay defaults to a real ISO timestamp when no clock is injected', () => {
+  const s = createStore(fakeStorage());
+  s.setDay('2026-08-10', { weightKg: 109.5 });
+  const ts = s.getDay('2026-08-10').updatedAt;
+  assert.strictEqual(typeof ts, 'string');
+  assert.ok(!isNaN(Date.parse(ts)), 'updatedAt parses as a valid date');
+});

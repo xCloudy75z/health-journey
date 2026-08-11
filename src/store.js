@@ -13,7 +13,8 @@
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
-  function createStore(storage) {
+  function createStore(storage, nowFn) {
+    var now = typeof nowFn === 'function' ? nowFn : function () { return new Date().toISOString(); };
     var state;
     try {
       var raw = storage.getItem(KEY);
@@ -41,6 +42,7 @@
       // A8: only a real value overwrites. An explicit null (or undefined) in a partial
       // must NOT wipe a populated field — the field-level merge preserves the prior value.
       for (var p in partial) if (partial.hasOwnProperty(p) && partial[p] !== undefined && partial[p] !== null) merged[p] = partial[p];
+      merged.updatedAt = now();   // Bundle 8: every save (chat or tap-in) re-stamps recency
       merged.date = date;
       if (idx >= 0) state.dailyLogs[idx] = merged; else state.dailyLogs.push(merged);
       persist();
