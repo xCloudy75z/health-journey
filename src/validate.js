@@ -18,6 +18,23 @@
     }
     return true;
   }
+  // mealsLog: optional; when present, must be an array of well-formed meal entries.
+  // Chat-populated only (no in-app entry form) — see the meals-intake-tracking spec.
+  function validMealsLog(m) {
+    if (m === null || m === undefined) return true;
+    if (!Array.isArray(m)) return false;
+    for (var i = 0; i < m.length; i++) {
+      var e = m[i];
+      if (!e || typeof e !== 'object') return false;
+      if (typeof e.label !== 'string' || e.label.trim() === '') return false;
+      if (typeof e.description !== 'string' || e.description.trim() === '') return false;
+      if (!isNum(e.kcal) || e.kcal < 0) return false;
+      if (!isNum(e.protein) || e.protein < 0) return false;
+      if (!isNum(e.carbs) || e.carbs < 0) return false;
+      if (!isNum(e.fat) || e.fat < 0) return false;
+    }
+    return true;
+  }
   // A2: a date must match YYYY-MM-DD AND round-trip through the same UTC-noon parser calc
   // uses — so an impossible date (2026-13-45, 2026-02-30) that silently rolls over is
   // rejected instead of corrupting the day / dose figures downstream.
@@ -39,6 +56,7 @@
     if (!(d.walkedMin === null || d.walkedMin === undefined || (isNum(d.walkedMin) && d.walkedMin >= 0))) return false;
     if (!(d.note === undefined || typeof d.note === 'string')) return false;
     if (!validFeelings(d.feelings)) return false;                       // Bundle 8
+    if (!validMealsLog(d.mealsLog)) return false;                       // mealsLog
     return true;
   }
   function validateImport(p) {

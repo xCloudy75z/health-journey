@@ -102,3 +102,52 @@ test('validateDay REJECTS feelings that is an array (not an object)', () => {
     feelings: [] };
   assert.strictEqual(validateDay(d), false);
 });
+
+test('validateDay ACCEPTS a day with a well-formed mealsLog', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: [] },
+    mealsLog: [{ label: 'Lunch', description: 'Chicken + rice', kcal: 610, protein: 63, carbs: 55, fat: 12 }] };
+  assert.strictEqual(validateDay(d), true);
+});
+
+test('validateDay ACCEPTS a day with mealsLog omitted (backwards compatible)', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null };
+  assert.strictEqual(validateDay(d), true);
+});
+
+test('validateDay REJECTS a mealsLog that is not an array', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: { label: 'Lunch' } };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS a mealsLog entry missing a label', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [{ description: 'Chicken + rice', kcal: 610, protein: 63, carbs: 55, fat: 12 }] };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS a mealsLog entry with a negative macro', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [{ label: 'Lunch', description: 'Chicken + rice', kcal: 610, protein: -5, carbs: 55, fat: 12 }] };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS a mealsLog entry with a non-numeric macro', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [{ label: 'Lunch', description: 'Chicken + rice', kcal: '610', protein: 63, carbs: 55, fat: 12 }] };
+  assert.strictEqual(validateDay(d), false);
+});
+
+test('validateDay REJECTS an empty-string label', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [{ label: '  ', description: 'Chicken + rice', kcal: 610, protein: 63, carbs: 55, fat: 12 }] };
+  assert.strictEqual(validateDay(d), false);
+});
