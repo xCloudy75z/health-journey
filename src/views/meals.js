@@ -4,16 +4,17 @@
 // meals-intake-tracking spec). NOT pure (reads store), no time construction.
 (function () {
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+  function num(v) { return (typeof v === 'number' && !isNaN(v) && isFinite(v)) ? v : 0; }
 
   function mealCard(m) {
     return '<div class="card meal" style="margin-top:8px">' +
       '<h3>' + esc(m.label) + '</h3>' +
       '<p style="color:var(--muted);font-size:13px;margin:0 0 8px">' + esc(m.description) + '</p>' +
       '<div class="macros">' +
-        '<span class="mac kcal">' + Math.round(m.kcal) + ' kcal</span>' +
-        '<span class="mac">P ' + Math.round(m.protein) + '</span>' +
-        '<span class="mac">C ' + Math.round(m.carbs) + '</span>' +
-        '<span class="mac">F ' + Math.round(m.fat) + '</span>' +
+        '<span class="mac kcal">' + Math.round(num(m.kcal)) + ' kcal</span>' +
+        '<span class="mac">P ' + Math.round(num(m.protein)) + '</span>' +
+        '<span class="mac">C ' + Math.round(num(m.carbs)) + '</span>' +
+        '<span class="mac">F ' + Math.round(num(m.fat)) + '</span>' +
       '</div></div>';
   }
 
