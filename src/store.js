@@ -75,7 +75,8 @@
       // Bundle 8: merge dailyLogs by date, most-recent updatedAt wins per day. A date
       // absent from the incoming payload is left untouched — an import only ADDS/UPDATES
       // days it knows about, it never deletes. scans/weekly/meds/settings are NOT part of
-      // this merge — they keep the pre-existing full-replace-when-present behavior below.
+      // this merge — their pre-existing full-replace-when-present behavior falls out of the
+      // `state = incoming` assignment below; no separate merge step exists or is needed for them.
       var mergedByDate = {}, mergedOrder = [];
       state.dailyLogs.forEach(function (d) {
         if (!mergedByDate.hasOwnProperty(d.date)) mergedOrder.push(d.date);
