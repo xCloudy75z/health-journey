@@ -208,7 +208,7 @@
       syncSegState(seg);   // A12: prefill keeps aria-pressed + the clear-hint accurate
     }
 
-    // A5: keep the sheet — and its sticky Save row — above the on-screen keyboard. iOS
+    // A5: keep the sheet — and its Save row — above the on-screen keyboard. iOS
     // Safari does not honour the viewport `interactive-widget` hint, so instead we watch
     // window.visualViewport and lift the sheet by however much the keyboard covers. Fully
     // defensive: a no-op where visualViewport is unavailable (older browsers / desktop).
