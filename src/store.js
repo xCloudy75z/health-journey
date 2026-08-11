@@ -58,19 +58,37 @@
       var v = deps.validate.validateImport(payload);
       if (!v.ok) return { ok: false, error: v.error };
       var migrated = deps.migrate.migrate(payload);
-      var next = clone(migrated.state);   // deep-clone: never share a reference with the imported payload
-      // A7: de-duplicate dailyLogs by date (last wins) so an imported payload with a
-      // repeated date collapses to a single entry instead of shadowing later reads.
-      if (Array.isArray(next.dailyLogs)) {
+      var incoming = clone(migrated.state);   // deep-clone: never share a reference with the imported payload
+      // A7: de-duplicate the INCOMING dailyLogs by date (last wins) before merging it
+      // against local state — unchanged from the prior replace-based behavior.
+      if (Array.isArray(incoming.dailyLogs)) {
         var byDate = {}, order = [];
-        for (var i = 0; i < next.dailyLogs.length; i++) {
-          var day = next.dailyLogs[i], dt = day && day.date;
+        for (var i = 0; i < incoming.dailyLogs.length; i++) {
+          var day = incoming.dailyLogs[i], dt = day && day.date;
           if (!byDate.hasOwnProperty(dt)) order.push(dt);
-          byDate[dt] = day;   // last write for this date wins
+          byDate[dt] = day;
         }
-        next.dailyLogs = order.map(function (dt) { return byDate[dt]; });
+        incoming.dailyLogs = order.map(function (dt) { return byDate[dt]; });
+      } else {
+        incoming.dailyLogs = [];
       }
-      state = next;
+      // Bundle 8: merge dailyLogs by date, most-recent updatedAt wins per day. A date
+      // absent from the incoming payload is left untouched — an import only ADDS/UPDATES
+      // days it knows about, it never deletes. scans/weekly/meds/settings are NOT part of
+      // this merge — they keep the pre-existing full-replace-when-present behavior below.
+      var mergedByDate = {}, mergedOrder = [];
+      state.dailyLogs.forEach(function (d) {
+        if (!mergedByDate.hasOwnProperty(d.date)) mergedOrder.push(d.date);
+        mergedByDate[d.date] = d;
+      });
+      incoming.dailyLogs.forEach(function (d) {
+        var existing = mergedByDate[d.date];
+        if (!existing) { mergedOrder.push(d.date); mergedByDate[d.date] = d; return; }
+        var incomingWins = !!d.updatedAt && (!existing.updatedAt || d.updatedAt > existing.updatedAt);
+        if (incomingWins) mergedByDate[d.date] = d;
+      });
+      incoming.dailyLogs = mergedOrder.map(function (dt) { return mergedByDate[dt]; });
+      state = incoming;
       persist();
       return { ok: true };
     }

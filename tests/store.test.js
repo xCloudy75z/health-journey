@@ -115,16 +115,18 @@ test('import DEDUPS duplicate dates, last wins (A7)', () => {
   assert.strictEqual(s.getDay('2026-08-10').dose, 'missed', 'last write wins');
 });
 
-test('import keeps UNDO — snapshot before, restore after', () => {
+test('import MERGES dailyLogs (does not delete local days the import omits); UNDO still works', () => {
   const s = createStore(fakeStorage());
   s.setDay('2026-08-10', { weightKg: 109.5 });
   const prev = s.snapshot();
-  s.importPayload({ app: 'health-journey', schemaVersion: 1, state: { dailyLogs: [{ date: '2026-09-01', weightKg: 100, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '' }] } });
-  assert.strictEqual(s.getDay('2026-08-10'), null, 'imported data replaced state');
-  assert.strictEqual(s.getDay('2026-09-01').weightKg, 100);
+  s.importPayload({ app: 'health-journey', schemaVersion: 2, state: { dailyLogs: [
+    { date: '2026-09-01', weightKg: 100, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '', updatedAt: '2026-09-01T06:00:00.000Z' }
+  ] } });
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'local-only day survives a merge import');
+  assert.strictEqual(s.getDay('2026-09-01').weightKg, 100, 'new day from the import is added');
   s.restore(prev);
-  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'restore undoes the import');
-  assert.strictEqual(s.getDay('2026-09-01'), null);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5);
+  assert.strictEqual(s.getDay('2026-09-01'), null, 'restore undoes the import');
 });
 
 test('setDay stamps updatedAt using the injected clock', () => {
@@ -143,4 +145,53 @@ test('setDay defaults to a real ISO timestamp when no clock is injected', () => 
   const ts = s.getDay('2026-08-10').updatedAt;
   assert.strictEqual(typeof ts, 'string');
   assert.ok(!isNaN(Date.parse(ts)), 'updatedAt parses as a valid date');
+});
+
+test('import: incoming day with a NEWER updatedAt replaces the local day', () => {
+  const s = createStore(fakeStorage(), () => '2026-08-10T06:00:00.000Z');
+  s.setDay('2026-08-10', { weightKg: 109.5 });   // local updatedAt = 06:00
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 2, state: { dailyLogs: [
+    { date: '2026-08-10', weightKg: 108.9, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '', updatedAt: '2026-08-10T19:00:00.000Z' }
+  ] } });
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 108.9, 'newer incoming wins');
+});
+
+test('import: incoming day with an OLDER updatedAt is discarded, local kept', () => {
+  const s = createStore(fakeStorage(), () => '2026-08-10T19:00:00.000Z');
+  s.setDay('2026-08-10', { weightKg: 109.5 });   // local updatedAt = 19:00
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 2, state: { dailyLogs: [
+    { date: '2026-08-10', weightKg: 200, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '', updatedAt: '2026-08-10T06:00:00.000Z' }
+  ] } });
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'older incoming discarded, local kept');
+});
+
+test('import: a null/missing updatedAt on the incoming side never wins', () => {
+  const s = createStore(fakeStorage(), () => '2026-08-10T06:00:00.000Z');
+  s.setDay('2026-08-10', { weightKg: 109.5 });
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 2, state: { dailyLogs: [
+    { date: '2026-08-10', weightKg: 150, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '', updatedAt: null }
+  ] } });
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(s.getDay('2026-08-10').weightKg, 109.5, 'a null incoming timestamp cannot beat a real local one');
+});
+
+test('import: a brand-new date (not present locally) is always added regardless of updatedAt', () => {
+  const s = createStore(fakeStorage());
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 2, state: { dailyLogs: [
+    { date: '2026-08-15', weightKg: 108, dose: null, walkedMin: null, sideEffects: null, adherence: null, note: '', updatedAt: null }
+  ] } });
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(s.getDay('2026-08-15').weightKg, 108);
+});
+
+test('import: scans/weekly/meds/settings still fully replace when present (unchanged regression)', () => {
+  const s = createStore(fakeStorage());
+  const res = s.importPayload({ app: 'health-journey', schemaVersion: 2, state: {
+    dailyLogs: [], scans: [{ date: '2026-08-07', fat_mass_percent: 46.5 }], weekly: [], meds: [], settings: { x: 1 }
+  } });
+  assert.strictEqual(res.ok, true);
+  assert.deepStrictEqual(s.getState().scans, [{ date: '2026-08-07', fat_mass_percent: 46.5 }]);
+  assert.deepStrictEqual(s.getState().settings, { x: 1 });
 });
