@@ -54,6 +54,7 @@
           '<button class="icon-btn" id="backupBtn" aria-label="Back up">⤓</button>' +
           '<button class="icon-btn" id="themeBtn" aria-label="Theme">' +
             (currentTheme() === 'dark' ? '☀' : '☾') + '</button>' +
+          '<button class="icon-btn" id="refreshBtn" aria-label="Refresh app">↻</button>' +
         '</div></header>' +
       '<div class="body">' + viewHtml(tab) + '</div>' +
       (active === 'today' ? '<div class="log-cta"><button class="btn btn-primary" id="logBtn">＋ Log today</button></div>' : '') +
@@ -65,6 +66,20 @@
     document.getElementById('themeBtn').addEventListener('click', toggleTheme);
     document.getElementById('backupBtn').addEventListener('click', function () {
       HJ.backupSheet.open(store, new Date().toISOString(), render);
+    });
+    var refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', function () {
+      // Clears the service worker + Cache Storage ONLY — never touches localStorage,
+      // where all real health data lives. This lets the user pull the latest deployed
+      // version without deleting/reinstalling the home-screen app.
+      if (HJ.toast) HJ.toast('Refreshing…');
+      var clearCaches = ('caches' in window)
+        ? caches.keys().then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k); })); })
+        : Promise.resolve();
+      var unregisterSW = ('serviceWorker' in navigator)
+        ? navigator.serviceWorker.getRegistrations().then(function (regs) { return Promise.all(regs.map(function (r) { return r.unregister(); })); })
+        : Promise.resolve();
+      Promise.all([clearCaches, unregisterSW]).then(function () { location.reload(); }).catch(function () { location.reload(); });
     });
     var logBtn = document.getElementById('logBtn');
     if (logBtn) logBtn.addEventListener('click', function () {
