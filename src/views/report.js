@@ -164,16 +164,39 @@
     // logged day — an un-rated day must not read as non-adherence.
     var adhRated = stats.adherence.rated;
     var adhPct = adhRated > 0 ? Math.round(stats.adherence.mostlyOrFully / adhRated * 100) : null;
+    // Real logged intake — only counts days inside the report window (Day1..todayStr)
+    // that actually have a mealsLog. Partial coverage is stated honestly, never implied
+    // as complete.
+    var intakeDays = logs.filter(function (l) {
+      return l && Array.isArray(l.mealsLog) && l.mealsLog.length > 0 &&
+        HJ.calc.daysBetween(DAY1, l.date) >= 0 && HJ.calc.daysBetween(l.date, todayStr) >= 0;
+    });
+    var loggedIntakeAvg = null;
+    if (intakeDays.length) {
+      var sums = intakeDays.reduce(function (acc, l) {
+        var tot = HJ.calc.mealsLogTotals(l.mealsLog);
+        acc.kcal += tot.kcal; acc.protein += tot.protein; acc.carbs += tot.carbs; acc.fat += tot.fat;
+        return acc;
+      }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+      var nDays = intakeDays.length;
+      loggedIntakeAvg = { kcal: sums.kcal / nDays, protein: sums.protein / nDays, carbs: sums.carbs / nDays, fat: sums.fat / nDays, days: nDays };
+    }
     var intakeCard = '<div class="card">' +
       row('Plan total <span style="color:var(--muted)">Dr Ola\'s</span>',
           (t.kcal != null ? t.kcal.toLocaleString('en-US') : '—') + ' <span style="color:var(--muted);font-weight:500">kcal</span>') +
       row('Protein / Carbs / Fat', 'P ' + num(t.protein, 0) + ' · C ' + num(t.carbs, 0) + ' · F ' + num(t.fat, 0) + ' <span style="color:var(--muted);font-weight:500">g</span>') +
       (t.fibre != null ? row('Fibre', num(t.fibre, 0) + ' <span style="color:var(--muted);font-weight:500">g</span>') : '') +
+      (loggedIntakeAvg
+        ? row('Actual (logged) <span style="color:var(--muted)">avg of ' + loggedIntakeAvg.days + ' logged day' + (loggedIntakeAvg.days === 1 ? '' : 's') + '</span>',
+              Math.round(loggedIntakeAvg.kcal).toLocaleString('en-US') + ' <span style="color:var(--muted);font-weight:500">kcal · P ' + Math.round(loggedIntakeAvg.protein) + ' C ' + Math.round(loggedIntakeAvg.carbs) + ' F ' + Math.round(loggedIntakeAvg.fat) + '</span>')
+        : '') +
       row('Adherence <span style="color:var(--muted)">self-rated</span>',
           adhPct != null
             ? '<span style="color:var(--muted)">mostly/fully ' + stats.adherence.mostlyOrFully + ' of ' + adhRated + ' rated day' + (adhRated === 1 ? '' : 's') + ' · ' + adhPct + '%</span>'
             : '<span style="color:var(--muted)">collecting…</span>') +
-      '<div class="flag" style="margin-top:10px">This is the <b>planned</b> intake. The app does not track grams actually eaten — adherence above is A\'s own self-rating, not a measured calorie count.</div>' +
+      (loggedIntakeAvg
+        ? '<div class="flag" style="margin-top:10px">Logged for ' + loggedIntakeAvg.days + ' of ' + dayN + ' day' + (dayN === 1 ? '' : 's') + ' so far' + (loggedIntakeAvg.days < dayN ? ' — the rest have no meal record.' : '.') + ' "Actual" is a meal-by-meal calculated average, not a lab measurement.</div>'
+        : '<div class="flag" style="margin-top:10px">This is the <b>planned</b> intake. The app does not track grams actually eaten — adherence above is A\'s own self-rating, not a measured calorie count.</div>') +
     '</div>';
 
     // ---- 6. Questions for Dr Ola — FIXED mechanical list (BP4) ----
