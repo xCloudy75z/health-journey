@@ -44,6 +44,36 @@
             '</div>' +
             '<div class="seg-hint" hidden>Tap the selected option again to clear it.</div>' +
           '</div>' +
+          '<div class="fbox">' +
+            '<div class="fbox-h">🫧 How you felt today</div>' +
+            '<div class="feelrow"><span class="fl">🤢 Nausea</span>' +
+              '<div class="scale" id="ls-f-nausea" data-feel="nausea">' +
+                '<button type="button" data-value="0">None</button><button type="button" data-value="1">Mild</button>' +
+                '<button type="button" data-value="2">Med</button><button type="button" data-value="3">Bad</button>' +
+              '</div></div>' +
+            '<div class="feelrow"><span class="fl">🍽️ Appetite</span>' +
+              '<div class="scale" id="ls-f-appetite" data-feel="appetite">' +
+                '<button type="button" data-value="0">Low</button><button type="button" data-value="1">Some</button>' +
+                '<button type="button" data-value="2">Normal</button><button type="button" data-value="3">High</button>' +
+              '</div></div>' +
+            '<div class="feelrow"><span class="fl">⚡ Energy</span>' +
+              '<div class="scale" id="ls-f-energy" data-feel="energy">' +
+                '<button type="button" data-value="0">Flat</button><button type="button" data-value="1">OK</button>' +
+                '<button type="button" data-value="2">Good</button><button type="button" data-value="3">Great</button>' +
+              '</div></div>' +
+            '<div class="feelrow"><span class="fl">🚻 Bowels</span>' +
+              '<div class="scale" id="ls-f-bowels" data-feel="bowels">' +
+                '<button type="button" data-value="0">None</button><button type="button" data-value="1">Slow</button>' +
+                '<button type="button" data-value="2">Normal</button><button type="button" data-value="3">Loose</button>' +
+              '</div></div>' +
+            '<div class="quicknote" id="ls-tags">' +
+              '<span class="qn" data-tag="Appetite way down">Appetite way down</span>' +
+              '<span class="qn" data-tag="Queasy after pill">Queasy after pill</span>' +
+              '<span class="qn" data-tag="Slept well">Slept well</span>' +
+              '<span class="qn" data-tag="Couldn\'t finish lunch">Couldn\'t finish lunch</span>' +
+              '<span class="qn" data-tag="Bloated">Bloated</span>' +
+            '</div>' +
+          '</div>' +
           '<div class="field">' +
             '<label>Side effects</label>' +
             '<div class="seg" id="ls-side">' +
@@ -82,6 +112,9 @@
     var segAdh = wrap.querySelector('#ls-adh');
     var elNote = wrap.querySelector('#ls-note');
     var qaRow = wrap.querySelector('#ls-qa');
+    var feelScales = { nausea: wrap.querySelector('#ls-f-nausea'), appetite: wrap.querySelector('#ls-f-appetite'),
+      energy: wrap.querySelector('#ls-f-energy'), bowels: wrap.querySelector('#ls-f-bowels') };
+    var tagsRow = wrap.querySelector('#ls-tags');
 
     // Prefill from the stored day (nulls stay blank/unselected).
     if (typeof prev.weightKg === 'number') elWeight.value = prev.weightKg;
@@ -90,6 +123,17 @@
     selectByValue(segDose, prev.dose == null ? null : String(prev.dose));
     selectByValue(segSide, prev.sideEffects == null ? null : String(prev.sideEffects));
     selectByValue(segAdh, prev.adherence == null ? null : String(prev.adherence));
+
+    // BB8: feelings must be prefilled in full (all 4 scales + tags) so a save always
+    // resubmits the complete object — store.setDay's merge is shallow at the top level.
+    var prevFeel = prev.feelings || {};
+    ['nausea', 'appetite', 'energy', 'bowels'].forEach(function (k) {
+      selectByValue(feelScales[k], prevFeel[k] == null ? null : String(prevFeel[k]));
+    });
+    var selectedTags = Array.isArray(prevFeel.tags) ? prevFeel.tags.slice() : [];
+    [].forEach.call(tagsRow.querySelectorAll('.qn'), function (q) {
+      if (selectedTags.indexOf(q.getAttribute('data-tag')) !== -1) q.classList.add('sel');
+    });
 
     // BB12: track whether the user touched anything, so a scrim/close tap on a
     // filled-but-unsaved entry asks before discarding. Prefill above is programmatic
@@ -124,6 +168,15 @@
       });
     }
     wireSeg(segDose, true); wireSeg(segSide, false); wireSeg(segAdh, false);
+    ['nausea', 'appetite', 'energy', 'bowels'].forEach(function (k) { wireSeg(feelScales[k], false); });
+    tagsRow.addEventListener('click', function (e) {
+      var q = e.target.closest('.qn'); if (!q) return;
+      markDirty();
+      var tag = q.getAttribute('data-tag');
+      var idx = selectedTags.indexOf(tag);
+      if (idx === -1) { selectedTags.push(tag); q.classList.add('sel'); }
+      else { selectedTags.splice(idx, 1); q.classList.remove('sel'); }
+    });
 
     elWeight.addEventListener('input', function () { markDirty(); clearWeightError(); });
     elNote.addEventListener('input', markDirty);
@@ -195,13 +248,16 @@
       clearWeightError();
       var side = selectedValue(segSide);
       var adh = selectedValue(segAdh);
+      function feelVal(seg) { var v = selectedValue(seg); return v === null ? null : Number(v); }
       var form = {
         weight: elWeight.value,
         walked: elWalked.value,
         dose: selectedValue(segDose),                 // null when unselected → merge preserves prior
         sideEffects: side === null ? null : Number(side),
         adherence: adh === null ? null : Number(adh),
-        note: elNote.value
+        note: elNote.value,
+        feelings: { nausea: feelVal(feelScales.nausea), appetite: feelVal(feelScales.appetite),
+          energy: feelVal(feelScales.energy), bowels: feelVal(feelScales.bowels), tags: selectedTags }
       };
       var patch = HJ.entry.buildEntryPatch(form);
       store.setDay(dateStr, patch);
