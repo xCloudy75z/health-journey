@@ -151,3 +151,17 @@ test('validateDay REJECTS an empty-string label', () => {
     mealsLog: [{ label: '  ', description: 'Chicken + rice', kcal: 610, protein: 63, carbs: 55, fat: 12 }] };
   assert.strictEqual(validateDay(d), false);
 });
+
+test('validateDay ACCEPTS a mealsLog entry with all-zero macros (e.g. black coffee)', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [{ label: 'Coffee', description: 'Black, no sugar', kcal: 0, protein: 0, carbs: 0, fat: 0 }] };
+  assert.strictEqual(validateDay(d), true);
+});
+
+test('validateDay REJECTS a mealsLog entry that is itself an array', () => {
+  const d = { date: '2026-08-10', weightKg: null, walkedMin: null, dose: null,
+    sideEffects: null, adherence: null, note: '', updatedAt: null,
+    mealsLog: [[1, 2, 3]] };
+  assert.strictEqual(validateDay(d), false);
+});

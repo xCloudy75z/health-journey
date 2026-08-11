@@ -25,7 +25,7 @@
     if (!Array.isArray(m)) return false;
     for (var i = 0; i < m.length; i++) {
       var e = m[i];
-      if (!e || typeof e !== 'object') return false;
+      if (!e || Array.isArray(e) || typeof e !== 'object') return false;
       if (typeof e.label !== 'string' || e.label.trim() === '') return false;
       if (typeof e.description !== 'string' || e.description.trim() === '') return false;
       if (!isNum(e.kcal) || e.kcal < 0) return false;
