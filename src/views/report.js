@@ -41,6 +41,35 @@
       '<div style="color:var(--muted);font-size:11.5px;margin-top:4px">Each bar = one logged day, in day order. Taller/amber = stronger side effect (0 none · 1 mild · 2 disruptive · 3 stopped me).</div>';
   }
 
+  var NAUSEA_COLORS = ['var(--surface-3)', 'var(--warn-soft)', 'var(--warn)', 'var(--bad)'];
+  function feelingsSection(timeline, highlights, dayN) {
+    if (!timeline.length && !highlights.length) {
+      return pending('Collecting… (Day ' + dayN + ' of 30)');
+    }
+    var out = '';
+    if (timeline.length) {
+      var cells = timeline.map(function (t) {
+        return '<span class="cell" title="Day ' + t.day + '" style="background:' + (NAUSEA_COLORS[t.nausea] || NAUSEA_COLORS[0]) + '"></span>';
+      }).join('');
+      out += '<div class="section-h" style="margin:4px 2px 8px">Nausea — day by day</div>' +
+        '<div class="tl-legend">' +
+          '<span><i style="background:var(--surface-3)"></i>None</span>' +
+          '<span><i style="background:var(--warn-soft)"></i>Mild</span>' +
+          '<span><i style="background:var(--warn)"></i>Medium</span>' +
+          '<span><i style="background:var(--bad)"></i>Bad</span>' +
+        '</div>' +
+        '<div class="tl">' + cells + '</div>';
+    }
+    if (highlights.length) {
+      out += '<div class="section-h" style="margin:16px 2px 8px">Highlights from your notes</div>' +
+        '<ul class="narr">' + highlights.map(function (h) {
+          return '<li><span class="d">Day ' + h.day + '</span><span class="q">"' + esc(h.note) + '"</span></li>';
+        }).join('') + '</ul>';
+    }
+    out += '<div class="rep-note" style="font-style:italic;margin-top:11px;border-top:1px dashed var(--border);padding-top:10px">Compiled from your entries only. No interpretation, no advice — these notes are for Dr Ola to read and decide on.</div>';
+    return out;
+  }
+
   function render(store, todayStr) {
     var DAY1 = HJ.schema.DAY1;
     var logs = store.allLogs();
@@ -164,6 +193,11 @@
         '<div style="color:var(--muted);font-size:11.5px;margin-top:8px">Mechanical figures only — stated numbers, no interpretation.</div></div>'
       : '<div class="card">' + pending('No completed doses or scan pairs yet — figures appear as data accrues.') + '</div>';
 
+    // ---- 7. Symptoms & how you felt ----
+    var timeline = HJ.calc.feelingsTimeline(logs, DAY1);
+    var highlights = HJ.calc.noteHighlights(logs, DAY1);
+    var feelCard = '<div class="card">' + feelingsSection(timeline, highlights, dayN) + '</div>';
+
     // ---- Buttons: Print + Export (wired in app.js) ----
     var buttons =
       '<div class="btn-row" style="margin-top:16px">' +
@@ -179,6 +213,7 @@
       sectionHead(4, 'Body-scan change', 'Seca scale') + scanCard +
       sectionHead(5, 'Intake vs target') + intakeCard +
       sectionHead(6, 'Questions for Dr Ola') + qCard +
+      sectionHead(7, 'Symptoms &amp; how you felt', 'from your daily taps') + feelCard +
       buttons +
     '</section>';
   }

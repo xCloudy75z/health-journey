@@ -144,6 +144,15 @@ input{font:inherit}
 .rep-line .v{font-weight:700;font-variant-numeric:tabular-nums;text-align:end}
 .rep-note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:4px}
 .qlist{margin:6px 0 0;padding-inline-start:18px;color:var(--text);font-size:13.5px;line-height:1.7}
+.tl-legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:10.5px;margin:6px 0 10px}
+.tl-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;vertical-align:middle;margin-inline-end:5px}
+.tl{display:grid;grid-template-columns:repeat(15,1fr);gap:3px}
+.tl .cell{aspect-ratio:1;border-radius:3px;background:var(--surface-3)}
+.narr{list-style:none;margin:12px 0 0;padding:0}
+.narr li{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.45}
+.narr li:last-child{border-bottom:none}
+.narr .d{flex:none;font-size:10.5px;font-weight:800;color:var(--accent-strong);width:42px;font-variant-numeric:tabular-nums}
+.narr .q{color:var(--text)}
 
 /* ============ BUTTONS ============ */
 .btn{padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-weight:700;font-size:15px;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px}
