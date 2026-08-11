@@ -222,6 +222,7 @@
     var paneOverview =
       '<div class="subpane on" id="tr-ov">' +
         '<div class="banner" style="background:var(--warn-soft);border-color:var(--warn)">🔒 <b>Phase 2 — NOT yet cleared by Dr Ola.</b> Right now she wants <b>walking only, 30 min/day</b>. Start this only when she clears training AND okays your left shoulder — likely ~Week 2 once you\'ve settled on the meds.</div>' +
+        '<p style="' + PMUTED + '">Built for someone who has never trained: learn the moves first, add weight slowly, always leave reps in the tank. Form beats weight, every time.</p>' +
         '<div class="card"><div class="section-h" style="margin:0 0 8px">The on-ramp — 3 blocks over 12 weeks</div>' +
           '<ul class="items" style="font-size:13.5px">' +
             '<li><b>Weeks 1–2 · LEARN</b> — bodyweight / empty hands only. 2 sessions/week, 2 sets, higher reps (10–15). Just groove the movement.</li>' +
