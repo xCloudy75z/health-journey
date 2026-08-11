@@ -14,7 +14,7 @@
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
   function createStore(storage, nowFn) {
-    var now = typeof nowFn === 'function' ? nowFn : function () { return new Date().toISOString(); };
+    var now = typeof nowFn === 'function' ? nowFn : function () { return new Date().toISOString(); }; // @impure-ok: default real-clock fallback; tests always inject nowFn
     var state;
     try {
       var raw = storage.getItem(KEY);
