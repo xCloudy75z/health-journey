@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { daysBetween, dayNumber, countdownToDay30, sevenDayAvg, doseTally, addDays, logStats,
-        windowAvg, percentChange, reportData, feelingsTimeline, noteHighlights } = require('../src/calc.js');
+        windowAvg, percentChange, reportData, feelingsTimeline, noteHighlights, mealsLogTotals } = require('../src/calc.js');
 
 const DAY1 = '2026-08-10';
 
@@ -222,4 +222,21 @@ test('noteHighlights returns only days with a non-empty note, sorted by day', ()
     { day: 1, note: 'Felt a bit sick mid-morning.' },
     { day: 2, note: 'Queasy after the pill, settled by noon.' }
   ]);
+});
+
+test('mealsLogTotals sums kcal/protein/carbs/fat across all meal entries', () => {
+  const mealsLog = [
+    { label: 'Lunch', description: 'x', kcal: 610, protein: 63, carbs: 55, fat: 12 },
+    { label: 'Shake', description: 'y', kcal: 340, protein: 34, carbs: 33, fat: 10 }
+  ];
+  assert.deepStrictEqual(mealsLogTotals(mealsLog), { kcal: 950, protein: 97, carbs: 88, fat: 22 });
+});
+
+test('mealsLogTotals returns all-zero for an empty array', () => {
+  assert.deepStrictEqual(mealsLogTotals([]), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+});
+
+test('mealsLogTotals returns all-zero for an absent/undefined mealsLog', () => {
+  assert.deepStrictEqual(mealsLogTotals(undefined), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  assert.deepStrictEqual(mealsLogTotals(null), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
 });

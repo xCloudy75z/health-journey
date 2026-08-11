@@ -141,9 +141,22 @@
       .map(function (l) { return { day: dayNumber(l.date, day1Str), note: l.note }; })
       .sort(function (a, b) { return a.day - b.day; });
   }
+  // Sums a day's mealsLog into one totals object. Absent/non-array input -> all zeros,
+  // never throws (a day with nothing logged is a valid, common case, not an error).
+  function mealsLogTotals(mealsLog) {
+    var list = Array.isArray(mealsLog) ? mealsLog : [];
+    return list.reduce(function (acc, m) {
+      acc.kcal += (typeof m.kcal === 'number' ? m.kcal : 0);
+      acc.protein += (typeof m.protein === 'number' ? m.protein : 0);
+      acc.carbs += (typeof m.carbs === 'number' ? m.carbs : 0);
+      acc.fat += (typeof m.fat === 'number' ? m.fat : 0);
+      return acc;
+    }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  }
   return { daysBetween: daysBetween, dayNumber: dayNumber, countdownToDay30: countdownToDay30,
            sevenDayAvg: sevenDayAvg, doseTally: doseTally, addDays: addDays,
            withinTrailing7: withinTrailing7, logStats: logStats,
            windowAvg: windowAvg, percentChange: percentChange, reportData: reportData,
-           feelingsTimeline: feelingsTimeline, noteHighlights: noteHighlights };
+           feelingsTimeline: feelingsTimeline, noteHighlights: noteHighlights,
+           mealsLogTotals: mealsLogTotals };
 });
