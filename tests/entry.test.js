@@ -36,3 +36,26 @@ test('a note-only save yields just the note (evening merge safety)', () => {
   const p = buildEntryPatch({ weight: '', walked: '', dose: null, sideEffects: null, adherence: null, note: 'felt fine' });
   assert.deepStrictEqual(p, { note: 'felt fine' });
 });
+
+test('buildEntryPatch includes feelings when at least one field is set', () => {
+  const patch = buildEntryPatch({ weight: '', walked: '', dose: null, sideEffects: null,
+    adherence: null, note: '', feelings: { nausea: 1, appetite: null, energy: null, bowels: null, tags: [] } });
+  assert.deepStrictEqual(patch.feelings, { nausea: 1, appetite: null, energy: null, bowels: null, tags: [] });
+});
+
+test('buildEntryPatch includes feelings when only a tag is set', () => {
+  const patch = buildEntryPatch({ weight: '', walked: '', dose: null, sideEffects: null,
+    adherence: null, note: '', feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: ['Bloated'] } });
+  assert.deepStrictEqual(patch.feelings.tags, ['Bloated']);
+});
+
+test('buildEntryPatch OMITS feelings entirely when the panel was untouched', () => {
+  const patch = buildEntryPatch({ weight: '109.5', walked: '30', dose: 'correct', sideEffects: null,
+    adherence: null, note: '', feelings: { nausea: null, appetite: null, energy: null, bowels: null, tags: [] } });
+  assert.strictEqual('feelings' in patch, false);
+});
+
+test('buildEntryPatch OMITS feelings when the form has no feelings key at all', () => {
+  const patch = buildEntryPatch({ weight: '109.5', walked: '', dose: null, sideEffects: null, adherence: null, note: '' });
+  assert.strictEqual('feelings' in patch, false);
+});

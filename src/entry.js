@@ -4,6 +4,11 @@
   //          sideEffects:null|0..3, adherence:null|0..3, note:'' }
   // Returns a partial with ONLY the fields the user actually set. 0 is a REAL value.
   function num(s){ if (s===''||s===null||s===undefined) return null; var n=Number(s); return isNaN(n)?null:n; }
+  function hasAnyFeeling(f) {
+    if (!f) return false;
+    return f.nausea != null || f.appetite != null || f.energy != null || f.bowels != null ||
+      (Array.isArray(f.tags) && f.tags.length > 0);
+  }
   function buildEntryPatch(form){
     var p = {};
     var w = num(form.weight); if (w!==null) p.weightKg = w;
@@ -12,6 +17,7 @@
     if (form.sideEffects!==null && form.sideEffects!==undefined) p.sideEffects = form.sideEffects; // keeps 0
     if (form.adherence!==null && form.adherence!==undefined) p.adherence = form.adherence;         // keeps 0
     if (typeof form.note==='string') p.note = form.note;
+    if (hasAnyFeeling(form.feelings)) p.feelings = form.feelings;   // omit entirely if untouched
     return p;
   }
   return { buildEntryPatch: buildEntryPatch };
