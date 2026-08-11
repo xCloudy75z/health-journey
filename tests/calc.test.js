@@ -240,3 +240,17 @@ test('mealsLogTotals returns all-zero for an absent/undefined mealsLog', () => {
   assert.deepStrictEqual(mealsLogTotals(undefined), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
   assert.deepStrictEqual(mealsLogTotals(null), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
 });
+
+test('mealsLogTotals skips a malformed entry instead of throwing', () => {
+  const mealsLog = [
+    { label: 'Lunch', description: 'x', kcal: 610, protein: 63, carbs: 55, fat: 12 },
+    null,
+    42
+  ];
+  assert.deepStrictEqual(mealsLogTotals(mealsLog), { kcal: 610, protein: 63, carbs: 55, fat: 12 });
+});
+
+test('mealsLogTotals treats NaN/Infinity macros as zero, not a corrupted sum', () => {
+  const mealsLog = [{ label: 'x', description: 'y', kcal: NaN, protein: Infinity, carbs: 55, fat: 12 }];
+  assert.deepStrictEqual(mealsLogTotals(mealsLog), { kcal: 0, protein: 0, carbs: 55, fat: 12 });
+});

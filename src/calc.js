@@ -141,15 +141,18 @@
       .map(function (l) { return { day: dayNumber(l.date, day1Str), note: l.note }; })
       .sort(function (a, b) { return a.day - b.day; });
   }
-  // Sums a day's mealsLog into one totals object. Absent/non-array input -> all zeros,
-  // never throws (a day with nothing logged is a valid, common case, not an error).
+  // Sums a day's mealsLog into one totals object. Absent/non-array input, or any
+  // malformed entry within it, contributes zero rather than throwing — a day with
+  // nothing (or something malformed) logged is a valid, common case, not an error.
   function mealsLogTotals(mealsLog) {
     var list = Array.isArray(mealsLog) ? mealsLog : [];
+    function num(v) { return (typeof v === 'number' && !isNaN(v) && isFinite(v)) ? v : 0; }
     return list.reduce(function (acc, m) {
-      acc.kcal += (typeof m.kcal === 'number' ? m.kcal : 0);
-      acc.protein += (typeof m.protein === 'number' ? m.protein : 0);
-      acc.carbs += (typeof m.carbs === 'number' ? m.carbs : 0);
-      acc.fat += (typeof m.fat === 'number' ? m.fat : 0);
+      if (!m || typeof m !== 'object') return acc;
+      acc.kcal += num(m.kcal);
+      acc.protein += num(m.protein);
+      acc.carbs += num(m.carbs);
+      acc.fat += num(m.fat);
       return acc;
     }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
   }
