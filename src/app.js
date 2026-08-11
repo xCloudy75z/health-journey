@@ -89,6 +89,21 @@
     });
     var guidesHome = app.querySelector('[data-guides-home]');
     if (guidesHome) guidesHome.addEventListener('click', function () { guidesSub = null; render(); });
+    // B8: Training guide's segmented sub-nav (Overview/Day A/Day B/Safety) — pure
+    // DOM toggle, no state/re-render, matching the approved mockup's own behavior.
+    var seg = app.querySelector('[data-seg]');
+    if (seg) {
+      [].forEach.call(seg.querySelectorAll('button'), function (b) {
+        b.addEventListener('click', function () {
+          [].forEach.call(seg.querySelectorAll('button'), function (x) { x.classList.remove('sel'); });
+          b.classList.add('sel');
+          var container = seg.parentNode;
+          [].forEach.call(container.querySelectorAll('.subpane'), function (p) { p.classList.remove('on'); });
+          var pane = container.querySelector('#' + b.getAttribute('data-pane'));
+          if (pane) pane.classList.add('on');
+        });
+      });
+    }
     // BB9: tap (or keyboard-activate) a recent day to edit/backfill that date.
     [].forEach.call(app.querySelectorAll('.row-tap[data-date]'), function (row) {
       function openDay() { HJ.logSheet.open(store, row.getAttribute('data-date'), render); }

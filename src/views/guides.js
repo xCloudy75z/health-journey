@@ -211,82 +211,93 @@
       '</span><span class="v" style="font-weight:600">' + start + ' · ' + sets + '</span></div>';
   }
   function gTraining() {
-    return detail('Training', 'Training plan',
-      '<div class="banner" style="background:var(--warn-soft);border-color:var(--warn)">🔒 <b>Phase 2 — NOT yet cleared by Dr Ola.</b> Right now she wants <b>walking only, 30 min/day</b>. Start this only when she clears training AND okays your left shoulder — likely ~Week 2 once you\'ve settled on the meds.</div>' +
+    var segNav =
+      '<div class="subseg" data-seg>' +
+        '<button type="button" class="sel" data-pane="tr-ov">Overview</button>' +
+        '<button type="button" data-pane="tr-a">Day A</button>' +
+        '<button type="button" data-pane="tr-b">Day B</button>' +
+        '<button type="button" data-pane="tr-safe">Safety</button>' +
+      '</div>';
 
-      '<p style="' + PMUTED + '">Built for someone who has never trained: learn the moves first, add weight slowly, always leave reps in the tank. Form beats weight, every time.</p>' +
+    var paneOverview =
+      '<div class="subpane on" id="tr-ov">' +
+        '<div class="banner" style="background:var(--warn-soft);border-color:var(--warn)">🔒 <b>Phase 2 — NOT yet cleared by Dr Ola.</b> Right now she wants <b>walking only, 30 min/day</b>. Start this only when she clears training AND okays your left shoulder — likely ~Week 2 once you\'ve settled on the meds.</div>' +
+        '<div class="card"><div class="section-h" style="margin:0 0 8px">The on-ramp — 3 blocks over 12 weeks</div>' +
+          '<ul class="items" style="font-size:13.5px">' +
+            '<li><b>Weeks 1–2 · LEARN</b> — bodyweight / empty hands only. 2 sessions/week, 2 sets, higher reps (10–15). Just groove the movement.</li>' +
+            '<li><b>Weeks 3–6 · BUILD</b> — add light dumbbells. 3 sessions/week, 3 sets of 8–12. Small, boring jumps.</li>' +
+            '<li><b>Weeks 7–12 · PROGRESS</b> — double progression: add weight when you earn it, add a set or an arm move as you recover well.</li>' +
+          '</ul></div>' +
+        '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Weekly rhythm</div>' +
+          '<p style="font-size:13.5px;margin:0">Two full-body workouts (Day A / Day B) that alternate — Mon A · Wed B · Fri A, walk on the days between, rest at least one full day. In Weeks 1–2 just do 2 days (Mon A / Thu B).</p>' +
+        '</div>' +
+        '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Judge the weight — reps in reserve (RIR)</div>' +
+          '<p style="font-size:13.5px;margin:0 0 8px">After a set, ask: how many more good reps could I have done?</p>' +
+          '<ul class="items" style="font-size:13.5px">' +
+            '<li><b style="color:var(--bad)">0 left (failure)</b> — form breaks. Never do this as a beginner, especially on press/RDL.</li>' +
+            '<li><b style="color:var(--good)">2–3 left</b> — your zone. Hard but clean. Stop the set here.</li>' +
+            '<li><b style="color:var(--warn)">4+ left</b> — too easy; add weight next session.</li>' +
+          '</ul>' +
+          '<div class="flag">Golden rule: stop a set the moment form breaks, or if you feel it in a joint instead of the muscle. That\'s not quitting — it\'s how you stay uninjured.</div>' +
+        '</div>' +
+        '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Warm-up <span class="r">every session, 5–8 min — not optional</span></div>' +
+          '<ul class="items" style="font-size:13.5px">' +
+            '<li>2 min easy march on the spot</li>' +
+            '<li>Arm circles — 10 each way · shoulder pull-aparts with a towel — 15 (gentle)</li>' +
+            '<li>Cat–cow — 8 slow · hip circles — 8 each side · 10 slow bodyweight squats</li>' +
+            '<li>On Day B (press day): 10 gentle shoulder rolls + slow empty-hand press — wake the shoulder up first</li>' +
+          '</ul></div>' +
+        '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Progress — reps before weight</div>' +
+          '<p style="font-size:13.5px;margin:0">Keep the same weight until all 3 sets hit the top rep (12) with 2–3 RIR. Then add the smallest step (<b>+2 kg</b>), drop back to ~8 reps, and climb again. Push-ups progress by lowering the surface instead: counter → table → chair → floor.</p>' +
+        '</div>' +
+        '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Why this fights the sagging (ترهلات)</div>' +
+          '<ul class="items" style="font-size:13.5px">' +
+            '<li><b>Keeps your muscle</b> — lifting + your ~145 g protein/day. Muscle keeps you firm as fat leaves.</li>' +
+            '<li><b>Moderate fat pace (~0.5–1 kg/week)</b> — steady loss = better skin adaptation. That\'s Dr Ola\'s dial.</li>' +
+            '<li><b>Time + hydration</b> — skin tightening lags months behind fat loss; water also helps the Rybelsus constipation.</li>' +
+            '<li>Each monthly Seca scan tracks your muscle. If too much lost weight is muscle, the report flags it for Dr Ola — about protein &amp; training, never "eat less".</li>' +
+          '</ul></div>' +
+      '</div>';
 
-      '<div class="card"><div class="section-h" style="margin:0 0 8px">The on-ramp — 3 blocks over 12 weeks</div>' +
-        '<ul class="items" style="font-size:13.5px">' +
-          '<li><b>Weeks 1–2 · LEARN</b> — bodyweight / empty hands only. 2 sessions/week, 2 sets, higher reps (10–15). Just groove the movement.</li>' +
-          '<li><b>Weeks 3–6 · BUILD</b> — add light dumbbells. 3 sessions/week, 3 sets of 8–12. Small, boring jumps.</li>' +
-          '<li><b>Weeks 7–12 · PROGRESS</b> — double progression: add weight when you earn it, add a set or an arm move as you recover well.</li>' +
-        '</ul></div>' +
+    var paneA =
+      '<div class="subpane" id="tr-a">' +
+        '<div class="card"><div class="section-h" style="margin:0 0 6px">Day A — full body <span class="r">start weights are Weeks 3+</span></div>' +
+          moveRow('Goblet squat', '6 kg', '3 × 8–12', '') +
+          moveRow('DB Romanian deadlift', '2 × 5 kg', '3 × 8–12', '⚠ back') +
+          moveRow('Incline push-up', 'bodyweight', '3 × 8–12', '⚠ shoulder') +
+          moveRow('One-arm DB row', '8 kg', '3 × 8–12/side', '') +
+          moveRow('Dead bug', 'bodyweight', '3 × 8/side', '') +
+          moveRow('Calf raise (optional)', 'BW / hold DBs', '2 × 15', '') +
+        '</div>' +
+      '</div>';
 
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Weekly rhythm</div>' +
-        '<p style="font-size:13.5px;margin:0">Two full-body workouts (Day A / Day B) that alternate — Mon A · Wed B · Fri A, walk on the days between, rest at least one full day. In Weeks 1–2 just do 2 days (Mon A / Thu B).</p>' +
-      '</div>' +
+    var paneB =
+      '<div class="subpane" id="tr-b">' +
+        '<div class="card"><div class="section-h" style="margin:0 0 6px">Day B — full body</div>' +
+          moveRow('DB reverse lunge', 'BW → 2 × 4 kg', '3 × 8/leg', '') +
+          moveRow('Glute bridge', 'BW → 8 kg', '3 × 12', '') +
+          moveRow('Seated DB press (neutral grip)', '2 × 3 kg', '3 × 8–12', '⚠ riskiest') +
+          moveRow('Chest-supported DB row', '2 × 6 kg', '3 × 8–12', '') +
+          moveRow('Plank', 'bodyweight', '3 × 20–40 s', '') +
+          moveRow('Biceps curl + triceps kickback (optional)', '2 × 4 kg', '2 × 10–12', '') +
+        '</div>' +
+      '</div>';
 
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Judge the weight — reps in reserve (RIR)</div>' +
-        '<p style="font-size:13.5px;margin:0 0 8px">After a set, ask: how many more good reps could I have done?</p>' +
-        '<ul class="items" style="font-size:13.5px">' +
-          '<li><b style="color:var(--bad)">0 left (failure)</b> — form breaks. Never do this as a beginner, especially on press/RDL.</li>' +
-          '<li><b style="color:var(--good)">2–3 left</b> — your zone. Hard but clean. Stop the set here.</li>' +
-          '<li><b style="color:var(--warn)">4+ left</b> — too easy; add weight next session.</li>' +
-        '</ul>' +
-        '<div class="flag">Golden rule: stop a set the moment form breaks, or if you feel it in a joint instead of the muscle. That\'s not quitting — it\'s how you stay uninjured.</div>' +
-      '</div>' +
+    var paneSafe =
+      '<div class="subpane" id="tr-safe">' +
+        '<div class="card"><div class="section-h" style="margin:0 0 8px">Form &amp; safety — the moves that matter</div>' +
+          '<ul class="items" style="font-size:13.5px">' +
+            '<li><b>DB Romanian deadlift (highest back risk):</b> flat back, brace the core, hinge from the hips (push your bum back), stay light. Feel it in the hamstrings/glutes, not the lower back — if you feel your back, stop the set.</li>' +
+            '<li><b>Seated DB press (⚠ your left shoulder, riskiest):</b> neutral grip (palms facing each other), light weight, slow, pain-free range only. Start 2 × 3 kg. Any pinch or the old injury waking up — <b>stop immediately.</b></li>' +
+            '<li><b>If the shoulder complains, substitute the press:</b> floor press (the floor limits the risky range), or light lateral raises 2 × 2 kg, or skip pressing and do an extra set of rows. Then tell Dr Ola it flared.</li>' +
+            '<li><b>Incline push-up:</b> elbows ~45° (not wide), shoulders down, hands on a counter/table. Higher surface = less shoulder strain.</li>' +
+            '<li><b>Goblet squat / glute bridge / plank:</b> chest up and core braced; the lift comes from legs/glutes, never from arching the spine.</li>' +
+            '<li><b>Rows, curl, kickback:</b> no twisting or swinging — controlled reps, upper arm still.</li>' +
+          '</ul></div>' +
+        '<div class="flag" style="margin-top:10px">⚠ A beginner program from your coach\'s material + standard strength guidance — <b>not medical clearance</b>. Start only when Dr Ola okays training, confirm about your shoulder, warm up every time, and stop any move that causes sharp or joint pain. When in doubt, go lighter.</div>' +
+      '</div>';
 
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Warm-up <span class="r">every session, 5–8 min — not optional</span></div>' +
-        '<ul class="items" style="font-size:13.5px">' +
-          '<li>2 min easy march on the spot</li>' +
-          '<li>Arm circles — 10 each way · shoulder pull-aparts with a towel — 15 (gentle)</li>' +
-          '<li>Cat–cow — 8 slow · hip circles — 8 each side · 10 slow bodyweight squats</li>' +
-          '<li>On Day B (press day): 10 gentle shoulder rolls + slow empty-hand press — wake the shoulder up first</li>' +
-        '</ul></div>' +
-
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 6px">Day A — full body <span class="r">start weights are Weeks 3+</span></div>' +
-        moveRow('Goblet squat', '6 kg', '3 × 8–12', '') +
-        moveRow('DB Romanian deadlift', '2 × 5 kg', '3 × 8–12', '⚠ back') +
-        moveRow('Incline push-up', 'bodyweight', '3 × 8–12', '⚠ shoulder') +
-        moveRow('One-arm DB row', '8 kg', '3 × 8–12/side', '') +
-        moveRow('Dead bug', 'bodyweight', '3 × 8/side', '') +
-        moveRow('Calf raise (optional)', 'BW / hold DBs', '2 × 15', '') +
-      '</div>' +
-
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 6px">Day B — full body</div>' +
-        moveRow('DB reverse lunge', 'BW → 2 × 4 kg', '3 × 8/leg', '') +
-        moveRow('Glute bridge', 'BW → 8 kg', '3 × 12', '') +
-        moveRow('Seated DB press (neutral grip)', '2 × 3 kg', '3 × 8–12', '⚠ riskiest') +
-        moveRow('Chest-supported DB row', '2 × 6 kg', '3 × 8–12', '') +
-        moveRow('Plank', 'bodyweight', '3 × 20–40 s', '') +
-        moveRow('Biceps curl + triceps kickback (optional)', '2 × 4 kg', '2 × 10–12', '') +
-      '</div>' +
-
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Form &amp; safety — the moves that matter</div>' +
-        '<ul class="items" style="font-size:13.5px">' +
-          '<li><b>DB Romanian deadlift (highest back risk):</b> flat back, brace the core, hinge from the hips (push your bum back), stay light. Feel it in the hamstrings/glutes, not the lower back — if you feel your back, stop the set.</li>' +
-          '<li><b>Seated DB press (⚠ your left shoulder, riskiest):</b> neutral grip (palms facing each other), light weight, slow, pain-free range only. Start 2 × 3 kg. Any pinch or the old injury waking up — <b>stop immediately.</b></li>' +
-          '<li><b>If the shoulder complains, substitute the press:</b> floor press (the floor limits the risky range), or light lateral raises 2 × 2 kg, or skip pressing and do an extra set of rows. Then tell Dr Ola it flared.</li>' +
-          '<li><b>Incline push-up:</b> elbows ~45° (not wide), shoulders down, hands on a counter/table. Higher surface = less shoulder strain.</li>' +
-          '<li><b>Goblet squat / glute bridge / plank:</b> chest up and core braced; the lift comes from legs/glutes, never from arching the spine.</li>' +
-          '<li><b>Rows, curl, kickback:</b> no twisting or swinging — controlled reps, upper arm still.</li>' +
-        '</ul></div>' +
-
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Progress — reps before weight</div>' +
-        '<p style="font-size:13.5px;margin:0">Keep the same weight until all 3 sets hit the top rep (12) with 2–3 RIR. Then add the smallest step (<b>+2 kg</b>), drop back to ~8 reps, and climb again. Push-ups progress by lowering the surface instead: counter → table → chair → floor.</p>' +
-      '</div>' +
-
-      '<div class="card" style="margin-top:10px"><div class="section-h" style="margin:0 0 8px">Why this fights the sagging (ترهلات)</div>' +
-        '<ul class="items" style="font-size:13.5px">' +
-          '<li><b>Keeps your muscle</b> — lifting + your ~145 g protein/day. Muscle keeps you firm as fat leaves.</li>' +
-          '<li><b>Moderate fat pace (~0.5–1 kg/week)</b> — steady loss = better skin adaptation. That\'s Dr Ola\'s dial.</li>' +
-          '<li><b>Time + hydration</b> — skin tightening lags months behind fat loss; water also helps the Rybelsus constipation.</li>' +
-          '<li>Each monthly Seca scan tracks your muscle. If too much lost weight is muscle, the report flags it for Dr Ola — about protein &amp; training, never "eat less".</li>' +
-        '</ul></div>' +
-
-      '<div class="flag">⚠ A beginner program from your coach\'s material + standard strength guidance — <b>not medical clearance</b>. Start only when Dr Ola okays training, confirm about your shoulder, warm up every time, and stop any move that causes sharp or joint pain. When in doubt, go lighter.</div>'
-    );
+    return detail('Training', 'Training plan', segNav + paneOverview + paneA + paneB + paneSafe);
   }
 
   // ---- guide: rybelsus protocol ---------------------------------------------
