@@ -69,6 +69,8 @@
     });
     var refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', function () {
+      // A3-style guard: don't silently discard an open sheet's unsaved input on refresh.
+      if (document.querySelector('.sheet-wrap.open') && !window.confirm('This will discard any unsaved entry. Continue?')) return;
       // Clears the service worker + Cache Storage ONLY — never touches localStorage,
       // where all real health data lives. This lets the user pull the latest deployed
       // version without deleting/reinstalling the home-screen app.
