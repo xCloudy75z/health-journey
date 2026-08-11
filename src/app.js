@@ -7,7 +7,8 @@
     { id: 'diet',   icon: '🍽️', label: 'Diet'   },
     { id: 'guides', icon: '📚', label: 'Guides' },
     { id: 'trends', icon: '📈', label: 'Trends' },
-    { id: 'report', icon: '🩺', label: 'Report' }
+    { id: 'report', icon: '🩺', label: 'Report' },
+    { id: 'meals',  icon: '📋', label: 'Meals'  }
   ];
   var active = 'today';
   var guidesSub = null;   // B4: null = the Guides index; a guide id = that guide's detail.
@@ -37,7 +38,8 @@
     if (tab.id === 'guides') return HJ.guides.render(guidesSub);
     if (tab.id === 'trends') return HJ.trends.render(store, todayStr);
     if (tab.id === 'report') return HJ.report.render(store, todayStr);
-    return '';   // A13: all five tabs are handled above; no placeholder fallback needed.
+    if (tab.id === 'meals') return HJ.meals.render(store, todayStr);
+    return '';   // A13: all six tabs are handled above; no placeholder fallback needed.
   }
 
   function render() {
